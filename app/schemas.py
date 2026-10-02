@@ -10,6 +10,7 @@ class RAGQueryRequest(BaseModel):
     query: str = Field(..., example="What is the maximum allowed API request payload size?", description="Enterprise knowledge query")
     top_k: int = Field(default=3, ge=1, le=10, description="Top-K documents to retrieve")
     include_citations: bool = Field(default=True, description="Whether to include inline citations [DOC-XXX]")
+    language: Optional[str] = Field(default="en", description="Query language code (en, es, fr, de, hi, ja)")
 
     @field_validator("query")
     @classmethod
@@ -38,6 +39,7 @@ class CitationClaimSchema(BaseModel):
 
 class RAGQueryResponse(BaseModel):
     query: str
+    language: str = "en"
     generated_answer: str
     retrieved_sources: List[SourceChunkSchema]
     extracted_citations: List[CitationClaimSchema]
