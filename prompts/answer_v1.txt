@@ -1,0 +1,7 @@
+Context Documents:
+{context_documents}
+
+User Question:
+{user_question}
+
+Grounded Answer with Citations [DOC-ID]:
