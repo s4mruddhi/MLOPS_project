@@ -1,13 +1,11 @@
-from .ingestion import ingest_data, generate_enterprise_churn_dataset
+from .ingestion import ingest_data, generate_enterprise_knowledge_base
 from .validation import DataValidator
-from .preprocessing import preprocess_data, build_preprocessor, FEATURE_COLUMNS, TARGET_COLUMN
+from .preprocessing import preprocess_rag_data, RAGVectorPreprocessor
 
 __all__ = [
     "ingest_data",
-    "generate_enterprise_churn_dataset",
+    "generate_enterprise_knowledge_base",
     "DataValidator",
-    "preprocess_data",
-    "build_preprocessor",
-    "FEATURE_COLUMNS",
-    "TARGET_COLUMN",
+    "preprocess_rag_data",
+    "RAGVectorPreprocessor",
 ]

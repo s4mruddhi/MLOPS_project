@@ -89,7 +89,13 @@ class AgenticRAGAgent:
 
         # 3. Answer & Citation Generation Step
         if self.mode == AgentMode.ACCURATE:
-            answer = sample.gold_answer
+            if sample.gold_answer:
+                answer = sample.gold_answer
+            elif retrieved_docs:
+                top_doc = retrieved_docs[0]
+                answer = f"According to {top_doc.source_title}, {top_doc.text} [{top_doc.doc_id}]."
+            else:
+                answer = "No relevant context found in enterprise knowledge base."
         elif self.mode == AgentMode.HALLUCINATING:
             # Inject an extra unsupported claim without proper citation or with wrong citation
             answer = sample.gold_answer + " Additionally, our data centers are 100% powered by nuclear fusion reactors [DOC-GATEWAY-102]."

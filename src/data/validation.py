@@ -1,77 +1,46 @@
 """
-Data Quality & Schema Validation Module.
-Checks data integrity, missing values, range constraints, and domain values.
+Knowledge Document & Chunk Validation Module.
+Validates document schema, missing fields, token length constraints, and source metadata.
 """
 
 from typing import Tuple, List, Dict, Any
-import pandas as pd
 
 
 class DataValidator:
-    """Validates data schema and quality constraints for raw datasets."""
+    """Validates document schema and data quality for enterprise RAG knowledge base."""
 
-    EXPECTED_COLUMNS = [
-        "customer_id",
-        "age",
-        "gender",
-        "tenure",
-        "monthly_charges",
-        "total_charges",
-        "contract",
-        "payment_method",
-        "support_tickets",
-        "churn",
-    ]
-
-    ALLOWED_GENDERS = {"Male", "Female"}
-    ALLOWED_CONTRACTS = {"Month-to-month", "One year", "Two year"}
-    ALLOWED_PAYMENTS = {"Electronic check", "Mailed check", "Bank transfer", "Credit card"}
+    REQUIRED_KEYS = ["doc_id", "source_title", "text", "category"]
 
     @classmethod
-    def validate(cls, df: pd.DataFrame) -> Tuple[bool, List[str]]:
+    def validate_documents(cls, documents: List[Dict[str, Any]]) -> Tuple[bool, List[str]]:
         errors = []
 
-        # 1. Missing Column Check
-        missing_cols = set(cls.EXPECTED_COLUMNS) - set(df.columns)
-        if missing_cols:
-            errors.append(f"Missing required columns: {missing_cols}")
+        if not documents:
+            return False, ["Knowledge base document collection is empty."]
 
-        if errors:
-            return False, errors
+        doc_ids = set()
 
-        # 2. Null / Missing Value Check
-        null_counts = df[cls.EXPECTED_COLUMNS].isnull().sum()
-        cols_with_nulls = null_counts[null_counts > 0]
-        if not cols_with_nulls.empty:
-            errors.append(f"Found unexpected missing values: {cols_with_nulls.to_dict()}")
+        for idx, doc in enumerate(documents):
+            # 1. Missing Key Check
+            for k in cls.REQUIRED_KEYS:
+                if k not in doc or not doc[k]:
+                    errors.append(f"Document idx {idx} missing required key '{k}'")
 
-        # 3. Numeric Range Validation
-        if (df["age"] < 18).any() or (df["age"] > 120).any():
-            errors.append("Invalid age values found (must be between 18 and 120)")
+            doc_id = doc.get("doc_id", "")
+            if doc_id in doc_ids:
+                errors.append(f"Duplicate document ID found: '{doc_id}'")
+            doc_ids.add(doc_id)
 
-        if (df["tenure"] < 0).any() or (df["tenure"] > 120).any():
-            errors.append("Invalid tenure values found (must be between 0 and 120)")
-
-        if (df["monthly_charges"] <= 0).any():
-            errors.append("Invalid monthly_charges found (must be positive)")
-
-        # 4. Categorical Domain Validation
-        invalid_genders = set(df["gender"].unique()) - cls.ALLOWED_GENDERS
-        if invalid_genders:
-            errors.append(f"Invalid gender values: {invalid_genders}")
-
-        invalid_contracts = set(df["contract"].unique()) - cls.ALLOWED_CONTRACTS
-        if invalid_contracts:
-            errors.append(f"Invalid contract values: {invalid_contracts}")
-
-        invalid_payments = set(df["payment_method"].unique()) - cls.ALLOWED_PAYMENTS
-        if invalid_payments:
-            errors.append(f"Invalid payment method values: {invalid_payments}")
-
-        # 5. Target Label Validation
-        target_vals = set(df["churn"].unique())
-        if not target_vals.issubset({0, 1}):
-            errors.append(f"Target 'churn' must be binary (0 or 1), got {target_vals}")
+            # 2. Text Length Constraint Check
+            text = doc.get("text", "")
+            if len(text.strip()) < 15:
+                errors.append(f"Document '{doc_id}' text is too short (< 15 chars)")
 
         is_valid = len(errors) == 0
         return is_valid, errors
+
+    @classmethod
+    def validate(cls, input_data: Any) -> Tuple[bool, List[str]]:
+        if isinstance(input_data, list):
+            return cls.validate_documents(input_data)
+        return False, ["Unsupported input type for validation."]

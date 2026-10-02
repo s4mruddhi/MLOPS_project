@@ -1,71 +1,77 @@
 """
-Data Ingestion Module.
-Simulates/Fetches enterprise dataset and saves to raw data path.
+Knowledge Base Data Ingestion Module for Enterprise RAG Assistant.
+Ingests enterprise knowledge documents, technical runbooks, and compliance policies.
 """
 
 import os
-import numpy as np
+import json
 import pandas as pd
-from src.config import RAW_DATA_PATH, set_seed
+from typing import List, Dict, Any
+from src.config import RAW_DOCS_PATH, set_seed
 
 
-def generate_enterprise_churn_dataset(n_samples: int = 2000) -> pd.DataFrame:
-    """Generates synthetic enterprise customer churn dataset with demographic & numerical features."""
+def generate_enterprise_knowledge_base() -> List[Dict[str, Any]]:
+    """Generates enterprise corpus of technical runbooks, SOC2 policies, and API gateway specs."""
     set_seed(42)
 
-    customer_ids = [f"CUST-{1000 + i}" for i in range(n_samples)]
-    age = np.random.randint(18, 75, size=n_samples)
-    gender = np.random.choice(["Male", "Female"], size=n_samples, p=[0.49, 0.51])
-    tenure_months = np.random.randint(1, 72, size=n_samples)
-    monthly_charges = np.round(np.random.uniform(20.0, 120.0, size=n_samples), 2)
-    total_charges = np.round(monthly_charges * tenure_months + np.random.normal(0, 10, size=n_samples), 2)
-    total_charges = np.maximum(total_charges, 20.0)
-
-    contract_type = np.random.choice(
-        ["Month-to-month", "One year", "Two year"], size=n_samples, p=[0.55, 0.25, 0.20]
-    )
-    payment_method = np.random.choice(
-        ["Electronic check", "Mailed check", "Bank transfer", "Credit card"],
-        size=n_samples,
-        p=[0.35, 0.25, 0.20, 0.20],
-    )
-    support_tickets = np.random.poisson(lam=1.5, size=n_samples)
-
-    logit = (
-        -0.08 * tenure_months
-        + 0.03 * monthly_charges
-        + 0.85 * support_tickets
-        + np.where(contract_type == "Month-to-month", 1.5, -1.2)
-        - 1.0
-    )
-    prob_churn = 1 / (1 + np.exp(-logit))
-    churn = (np.random.uniform(0, 1, size=n_samples) < prob_churn).astype(int)
-
-    df = pd.DataFrame(
+    documents = [
         {
-            "customer_id": customer_ids,
-            "age": age,
-            "gender": gender,
-            "tenure": tenure_months,
-            "monthly_charges": monthly_charges,
-            "total_charges": total_charges,
-            "contract": contract_type,
-            "payment_method": payment_method,
-            "support_tickets": support_tickets,
-            "churn": churn,
-        }
-    )
+            "doc_id": "DOC-GATEWAY-101",
+            "source_title": "Enterprise API Gateway Architecture & Limits",
+            "category": "API_Infrastructure",
+            "text": "Enterprise API Gateway specifies a maximum allowed API request payload size of 10 MB for standard REST endpoints. Streaming gRPC and WebSocket endpoints permit up to 50 MB payload buffer size.",
+            "metadata": {"author": "Infrastructure Team", "version": "2025.1"},
+        },
+        {
+            "doc_id": "DOC-SEC-201",
+            "source_title": "SOC2 Type II Audit & Log Retention Policy",
+            "category": "Security_Compliance",
+            "text": "Security audit logs, system access logs, and administrative trace logs must be securely archived and retained for at least 7 years to satisfy SOC2 Type II compliance audit regulations.",
+            "metadata": {"author": "Compliance Office", "version": "3.2"},
+        },
+        {
+            "doc_id": "DOC-COMP-305",
+            "source_title": "GDPR Compliance & Data Privacy Standard",
+            "category": "Security_Compliance",
+            "text": "GDPR Article 17 Right to Erasure mandates that customer PII data must be permanently erased from all production and backup stores within 30 calendar days upon receipt of a valid deletion request.",
+            "metadata": {"author": "Legal Dept", "version": "4.0"},
+        },
+        {
+            "doc_id": "DOC-PG-PROD-2025",
+            "source_title": "PostgreSQL 2025 Production Tuning Guide",
+            "category": "Database_Ops",
+            "text": "Idle connection timeout MUST be set to 30 seconds for all PostgreSQL production pools to prevent connection starvation under peak loads.",
+            "metadata": {"author": "DBA Team", "version": "2025.2"},
+        },
+        {
+            "doc_id": "DOC-REFUND-POL",
+            "source_title": "Customer Refund Policy 2024",
+            "category": "Customer_Support",
+            "text": "Subscriptions cancelled within 14 days of purchase qualify for a 100% full refund. Cancellations past 14 days receive a pro-rated credit refund applied to the account balance.",
+            "metadata": {"author": "Billing Ops", "version": "1.8"},
+        },
+        {
+            "doc_id": "DOC-DB-OPS-501",
+            "source_title": "Database Monitoring & Cluster Metrics Runbook",
+            "category": "Database_Ops",
+            "text": "Database metrics should be retrieved using the cluster status tool. Primary node CPU utilization thresholds above 80% require immediate auto-scaling alerts.",
+            "metadata": {"author": "SRE Team", "version": "5.1"},
+        },
+    ]
 
-    return df
+    return documents
 
 
-def ingest_data(output_path: str = RAW_DATA_PATH) -> pd.DataFrame:
-    """Ingests dataset and saves to specified raw data location."""
+def ingest_data(output_path: str = RAW_DOCS_PATH) -> List[Dict[str, Any]]:
+    """Ingests enterprise document corpus and saves to raw JSON file."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    df = generate_enterprise_churn_dataset(n_samples=2500)
-    df.to_csv(output_path, index=False)
-    print(f"[Ingestion] Successfully ingested {len(df)} records into '{output_path}'.")
-    return df
+    docs = generate_enterprise_knowledge_base()
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(docs, f, indent=2)
+
+    print(f"[Ingestion] Successfully ingested {len(docs)} enterprise documents into '{output_path}'.")
+    return docs
 
 
 if __name__ == "__main__":

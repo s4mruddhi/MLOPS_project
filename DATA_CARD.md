@@ -1,34 +1,28 @@
-# Data Card: Enterprise Customer Churn Dataset
+# Data Card: Enterprise Knowledge Base & Benchmark Corpus
 
 ## 1. Dataset Overview
-- **Dataset Name**: Enterprise Customer Churn Dataset (`data/raw/customer_churn.csv`)
+- **Dataset Name**: Enterprise Knowledge Base Corpus (`data/raw/knowledge_docs.json`)
 - **Version**: Version 1.0 (Managed with DVC)
-- **Domain**: Telecom / SaaS Subscription Services
-- **Size**: 2,500 Customer Records, 10 Attributes
+- **Domain**: Enterprise Technical Infrastructure, SOC2 Compliance, GDPR Regulations, API Specifications
+- **Format**: Structured JSON Document Collection & DVC Vector Chunk Stores
 
-## 2. Dataset Schema & Descriptions
-| Feature Name | Data Type | Domain / Range | Description |
-| :--- | :--- | :--- | :--- |
-| `customer_id` | String | `CUST-1000` to `CUST-3499` | Unique Customer Identifier |
-| `age` | Integer | [18, 75] | Customer Age in Years |
-| `gender` | Categorical | `Male`, `Female` | Self-reported Demographic Gender |
-| `tenure` | Integer | [1, 72] | Account Tenure in Months |
-| `monthly_charges` | Float | [$20.00, $120.00] | Monthly Recurring Billing Amount |
-| `total_charges` | Float | [$20.00, $8640.00] | Lifetime Cumulative Billing Amount |
-| `contract` | Categorical | `Month-to-month`, `One year`, `Two year` | Active Subscription Plan Type |
-| `payment_method` | Categorical | `Electronic check`, `Mailed check`, `Bank transfer`, `Credit card` | Default Billing Payment Method |
-| `support_tickets` | Integer | [0, 8] | Number of Customer Support Tickets Filed |
-| `churn` (Target) | Binary | `0` (Retained), `1` (Churned) | Historical Churn Status |
+## 2. Document Schema & Descriptions
+| Attribute | Data Type | Description |
+| :--- | :--- | :--- |
+| `doc_id` | String | Unique Document Identifier (e.g. `DOC-SEC-201`, `DOC-GATEWAY-101`) |
+| `source_title` | String | Human-readable document title |
+| `category` | String | Document category (`API_Infrastructure`, `Security_Compliance`, `Database_Ops`, `Customer_Support`) |
+| `text` | String | Text content containing policies, gateway specs, and runbook guidelines |
+| `metadata` | Object | Author, version, and document release metadata |
 
-## 3. Data Integrity & Validation Rules
-- **Missing Value Handling**: Zero null tolerance across all mandatory fields (`DataValidator`).
-- **Domain Constraints**: Range checks on `age` (18-120), `tenure` (0-120), and positive `monthly_charges`.
-- **Target Distribution**: ~28.4% Churn Positive Rate (Stratified split enforced during train/test partitioning).
+## 3. Data Quality & Schema Validation Rules
+- **Schema Validation**: Verified via `DataValidator.validate_documents` (Checking missing keys, duplicate IDs, and text token bounds).
+- **Text Length Bounds**: Minimum 15 characters per chunk; zero tolerance for empty documents.
 
-## 4. Anonymization & Privacy (PII)
-- PII elements (Names, Social Security Numbers, Credit Card Numbers) are excluded.
-- Customer IDs are synthetic hashes (`CUST-XXXX`).
+## 4. Anonymization & Security
+- All customer PII is excluded from internal documentation.
+- Proprietary credentials or API keys are scrubbed prior to vector embedding.
 
 ## 5. DVC Data Lineage
-- Raw data tracked via `.dvc` pointers pointing to local/S3 remote storage (`../dvc_storage`).
-- Reproducible hashing verified via MD5 checksums.
+- Raw knowledge base corpus tracked via `.dvc` metadata pointers.
+- Reproducible MD5 hashes generated for data version verification.

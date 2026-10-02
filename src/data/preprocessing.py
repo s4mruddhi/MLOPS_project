@@ -1,65 +1,62 @@
 """
-Data Preprocessing & Feature Engineering Module.
-Builds, fits, and applies Scikit-Learn transformers for numerical scaling and categorical encoding.
+Document Chunking & Vector Preprocessing Pipeline for RAG.
+Transforms raw knowledge documents into chunk embeddings and vector search indexes.
 """
 
 import os
 import joblib
 import pandas as pd
 import numpy as np
-from typing import Tuple, Optional, List
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from src.config import MODEL_ARTIFACT_DIR, PROCESSED_DATA_PATH, set_seed
-
-NUMERICAL_FEATURES = ["age", "tenure", "monthly_charges", "total_charges", "support_tickets"]
-CATEGORICAL_FEATURES = ["gender", "contract", "payment_method"]
-FEATURE_COLUMNS = NUMERICAL_FEATURES + CATEGORICAL_FEATURES
-TARGET_COLUMN = "churn"
+from typing import Tuple, Optional, List, Dict, Any
+from sklearn.feature_extraction.text import TfidfVectorizer
+from src.config import MODEL_ARTIFACT_DIR, PROCESSED_CHUNKS_PATH, set_seed
 
 
-def build_preprocessor() -> ColumnTransformer:
-    """Instantiates ColumnTransformer for scaling numericals and encoding categoricals."""
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ("num", StandardScaler(), NUMERICAL_FEATURES),
-            ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), CATEGORICAL_FEATURES),
-        ]
-    )
-    return preprocessor
+class RAGVectorPreprocessor:
+    """Chunks documents and generates vector embedding matrices for semantic search."""
+
+    def __init__(self, max_features: int = 500):
+        self.vectorizer = TfidfVectorizer(max_features=max_features, stop_words="english")
+        self.document_chunks: List[Dict[str, Any]] = []
+
+    def fit_transform(self, documents: List[Dict[str, Any]]) -> np.ndarray:
+        """Processes document corpus into searchable chunk vectors."""
+        self.document_chunks = documents
+        texts = [doc["text"] for doc in documents]
+        vectors = self.vectorizer.fit_transform(texts).toarray()
+        return vectors
+
+    def transform_query(self, query: str) -> np.ndarray:
+        """Transforms a user query into vector space."""
+        return self.vectorizer.transform([query]).toarray()
 
 
-def preprocess_data(
-    df: pd.DataFrame,
-    preprocessor: Optional[ColumnTransformer] = None,
+def preprocess_rag_data(
+    documents: List[Dict[str, Any]],
+    preprocessor: Optional[RAGVectorPreprocessor] = None,
     fit: bool = True,
-    save_path: Optional[str] = PROCESSED_DATA_PATH,
-) -> Tuple[np.ndarray, Optional[np.ndarray], ColumnTransformer, List[str]]:
-    """Preprocesses input dataframe and returns feature matrix X, target array y, preprocessor, and feature names."""
+    save_path: Optional[str] = PROCESSED_CHUNKS_PATH,
+) -> Tuple[np.ndarray, RAGVectorPreprocessor, List[Dict[str, Any]]]:
+    """Preprocesses enterprise document corpus into indexed vector representations."""
     set_seed(42)
 
-    X_raw = df[FEATURE_COLUMNS]
-    y = df[TARGET_COLUMN].values if TARGET_COLUMN in df.columns else None
-
     if fit or preprocessor is None:
-        preprocessor = build_preprocessor()
-        X_trans = preprocessor.fit_transform(X_raw)
-        # Save fitted transformer artifact
+        preprocessor = RAGVectorPreprocessor()
+        vectors = preprocessor.fit_transform(documents)
+
+        # Save artifacts
         os.makedirs(MODEL_ARTIFACT_DIR, exist_ok=True)
-        joblib.dump(preprocessor, os.path.join(MODEL_ARTIFACT_DIR, "preprocessor.pkl"))
+        joblib.dump(preprocessor, os.path.join(MODEL_ARTIFACT_DIR, "rag_preprocessor.pkl"))
+        joblib.dump(vectors, os.path.join(MODEL_ARTIFACT_DIR, "vector_index.pkl"))
+        joblib.dump(documents, os.path.join(MODEL_ARTIFACT_DIR, "raw_documents.pkl"))
     else:
-        X_trans = preprocessor.transform(X_raw)
+        texts = [doc["text"] for doc in documents]
+        vectors = preprocessor.vectorizer.transform(texts).toarray()
 
-    # Get feature names after one-hot encoding
-    cat_encoder = preprocessor.named_transformers_["cat"]
-    cat_feature_names = list(cat_encoder.get_feature_names_out(CATEGORICAL_FEATURES))
-    feature_names = NUMERICAL_FEATURES + cat_feature_names
-
-    if save_path and y is not None:
+    if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        processed_df = pd.DataFrame(X_trans, columns=feature_names)
-        processed_df["churn"] = y
-        processed_df.to_csv(save_path, index=False)
-        print(f"[Preprocessing] Saved processed dataset to '{save_path}'.")
+        df_chunks = pd.DataFrame(documents)
+        df_chunks.to_csv(save_path, index=False)
+        print(f"[Preprocessing] Saved processed RAG chunks to '{save_path}'.")
 
-    return X_trans, y, preprocessor, feature_names
+    return vectors, preprocessor, documents

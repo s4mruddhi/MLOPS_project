@@ -1,38 +1,30 @@
 """
-Unit tests for model training and prediction determinism.
+Unit tests for RAG Assistant execution and quality gate evaluation.
 """
 
 import os
 import joblib
-import pandas as pd
-import numpy as np
 import pytest
-from src.data.ingestion import generate_enterprise_churn_dataset
-from src.data.preprocessing import preprocess_data
+from src.data.ingestion import generate_enterprise_knowledge_base
+from src.data.preprocessing import preprocess_rag_data
 from src.models.train import run_training_pipeline
 from src.config import MODEL_ARTIFACT_DIR
 
 
 def test_training_pipeline_execution():
     metrics, champion_name = run_training_pipeline()
-    assert "f1_score" in metrics
-    assert "accuracy" in metrics
-    assert metrics["accuracy"] >= 0.70
+    assert "context_precision" in metrics
+    assert "citation_precision" in metrics
+    assert metrics["context_precision"] >= 0.75
     assert len(champion_name) > 0
 
-    model_path = os.path.join(MODEL_ARTIFACT_DIR, "best_model.pkl")
-    assert os.path.exists(model_path)
+    champion_file = os.path.join(MODEL_ARTIFACT_DIR, "champion_name.pkl")
+    assert os.path.exists(champion_file)
 
 
-def test_prediction_output_bounds_and_determinism():
-    df = generate_enterprise_churn_dataset(n_samples=50)
-    X_trans, y, preprocessor, _ = preprocess_data(df, fit=True, save_path=None)
+def test_rag_vector_transformation():
+    docs = generate_enterprise_knowledge_base()
+    vectors, preprocessor, _ = preprocess_rag_data(docs, fit=True, save_path=None)
 
-    model_path = os.path.join(MODEL_ARTIFACT_DIR, "best_model.pkl")
-    model = joblib.load(model_path)
-
-    probs = model.predict_proba(X_trans)[:, 1]
-    preds = model.predict(X_trans)
-
-    assert (probs >= 0.0).all() and (probs <= 1.0).all()
-    assert set(preds).issubset({0, 1})
+    query_vec = preprocessor.transform_query("What is the API Gateway payload limit?")
+    assert query_vec.shape[1] == vectors.shape[1]

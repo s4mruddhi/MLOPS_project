@@ -1,55 +1,50 @@
 """
-Model Evaluation & Quality Gate Module.
-Computes classification metrics, ROC-AUC, confusion matrix, and checks quality gate thresholds.
+RAG System Evaluation & Quality Gate Module.
+Computes Context Precision, Context Recall, Citation Precision, and Answer Faithfulness metrics.
 """
 
 from typing import Dict, Any, Tuple, List
-import numpy as np
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    roc_auc_score,
-    confusion_matrix,
+from src.config import (
+    MIN_CONTEXT_PRECISION,
+    MIN_CITATION_PRECISION,
+    MIN_FAITHFULNESS_SCORE,
 )
-from src.config import MIN_ACCURACY_THRESHOLD, MIN_F1_THRESHOLD, MIN_ROC_AUC_THRESHOLD
 
 
-def evaluate_model(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> Dict[str, float]:
-    """Computes comprehensive classification metrics."""
-    acc = accuracy_score(y_true, y_pred)
-    prec = precision_score(y_true, y_pred, zero_division=0)
-    rec = recall_score(y_true, y_pred, zero_division=0)
-    f1 = f1_score(y_true, y_pred, zero_division=0)
-    auc = roc_auc_score(y_true, y_prob)
-
+def evaluate_rag_model(
+    context_precision: float,
+    context_recall: float,
+    citation_precision: float,
+    faithfulness_score: float,
+    unsupported_rate: float,
+) -> Dict[str, float]:
+    """Formats RAG evaluation metrics."""
     return {
-        "accuracy": round(float(acc), 4),
-        "precision": round(float(prec), 4),
-        "recall": round(float(rec), 4),
-        "f1_score": round(float(f1), 4),
-        "roc_auc": round(float(auc), 4),
+        "context_precision": round(float(context_precision), 4),
+        "context_recall": round(float(context_recall), 4),
+        "citation_precision": round(float(citation_precision), 4),
+        "faithfulness_score": round(float(faithfulness_score), 4),
+        "unsupported_citation_rate": round(float(unsupported_rate), 4),
     }
 
 
 def check_quality_gate(metrics: Dict[str, float]) -> Tuple[bool, List[str]]:
-    """Checks if model metrics pass minimum enterprise quality gate thresholds for production release."""
+    """Checks if candidate RAG system passes quality gate thresholds for production promotion."""
     failures = []
 
-    if metrics["accuracy"] < MIN_ACCURACY_THRESHOLD:
+    if metrics["context_precision"] < MIN_CONTEXT_PRECISION:
         failures.append(
-            f"Accuracy {metrics['accuracy']:.4f} is below minimum threshold {MIN_ACCURACY_THRESHOLD}"
+            f"Context Precision {metrics['context_precision']:.4f} below threshold {MIN_CONTEXT_PRECISION}"
         )
 
-    if metrics["f1_score"] < MIN_F1_THRESHOLD:
+    if metrics["citation_precision"] < MIN_CITATION_PRECISION:
         failures.append(
-            f"F1-Score {metrics['f1_score']:.4f} is below minimum threshold {MIN_F1_THRESHOLD}"
+            f"Citation Precision {metrics['citation_precision']:.4f} below threshold {MIN_CITATION_PRECISION}"
         )
 
-    if metrics["roc_auc"] < MIN_ROC_AUC_THRESHOLD:
+    if metrics["faithfulness_score"] < MIN_FAITHFULNESS_SCORE:
         failures.append(
-            f"ROC-AUC {metrics['roc_auc']:.4f} is below minimum threshold {MIN_ROC_AUC_THRESHOLD}"
+            f"Faithfulness Score {metrics['faithfulness_score']:.4f} below threshold {MIN_FAITHFULNESS_SCORE}"
         )
 
     passed = len(failures) == 0

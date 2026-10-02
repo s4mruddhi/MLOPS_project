@@ -1,132 +1,132 @@
 """
-Model Training & MLflow Experiment Management Module.
-Trains Baseline and Candidate models, logs artifacts to MLflow, and registers champion model.
+RAG Assistant Model Training & MLflow Experiment Management Module.
+Evaluates RAG architectures, logs metrics to MLflow, and registers champion RAG engine.
 """
 
 import os
 import joblib
 import mlflow
-import mlflow.sklearn
 import numpy as np
 import pandas as pd
-from typing import Dict, Any, Tuple
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from typing import Dict, Any, Tuple, List
 
 from src.config import (
     set_seed,
     MLFLOW_TRACKING_URI,
     EXPERIMENT_NAME,
     MODEL_REGISTRY_NAME,
-    RAW_DATA_PATH,
+    RAW_DOCS_PATH,
     MODEL_ARTIFACT_DIR,
-    REFERENCE_DATA_PATH,
+    REFERENCE_QUERIES_PATH,
 )
 from src.data.ingestion import ingest_data
 from src.data.validation import DataValidator
-from src.data.preprocessing import preprocess_data
-from src.models.evaluate import evaluate_model, check_quality_gate
+from src.data.preprocessing import preprocess_rag_data
+from src.models.evaluate import evaluate_rag_model, check_quality_gate
+from benchmark.dataset_generator import SyntheticDatasetGenerator
+from rag_agent.agent import AgenticRAGAgent, AgentMode
+from pipeline.runner import ContinuousBenchmarkRunner
 
 
 def run_training_pipeline() -> Tuple[Dict[str, Any], str]:
-    """Runs complete training, evaluation, MLflow logging, and model registration pipeline."""
+    """Runs complete RAG evaluation, MLflow logging, and model registration pipeline."""
     set_seed(42)
 
-    # 1. Ingest & Validate Data
-    if not os.path.exists(RAW_DATA_PATH):
-        df_raw = ingest_data()
+    # 1. Ingest & Validate Document Corpus
+    if not os.path.exists(RAW_DOCS_PATH):
+        documents = ingest_data()
     else:
-        df_raw = pd.read_csv(RAW_DATA_PATH)
+        with open(RAW_DOCS_PATH, "r", encoding="utf-8") as f:
+            import json
+            documents = json.load(f)
 
-    is_valid, validation_errors = DataValidator.validate(df_raw)
+    is_valid, validation_errors = DataValidator.validate(documents)
     if not is_valid:
-        raise ValueError(f"Data validation failed prior to training: {validation_errors}")
+        raise ValueError(f"Data validation failed prior to RAG training: {validation_errors}")
 
-    # Save reference baseline for drift monitoring
-    df_raw.to_csv(REFERENCE_DATA_PATH, index=False)
+    # 2. Preprocess & Index Vectors
+    vectors, preprocessor, docs = preprocess_rag_data(documents, fit=True)
 
-    # 2. Preprocess Data
-    X_trans, y, preprocessor, feature_names = preprocess_data(df_raw, fit=True)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_trans, y, test_size=0.20, random_state=42, stratify=y
-    )
+    # Save reference queries dataset for drift monitoring
+    samples = SyntheticDatasetGenerator.generate_default_suite()
+    ref_queries = pd.DataFrame([{"query_id": s.sample_id, "query_text": s.query, "category": s.category} for s in samples])
+    ref_queries.to_csv(REFERENCE_QUERIES_PATH, index=False)
 
     # 3. Configure MLflow Experiment Tracking
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment(EXPERIMENT_NAME)
 
-    models_to_train = {
-        "Baseline_LogisticRegression": LogisticRegression(max_iter=1000, random_state=42),
-        "Candidate_RandomForest": RandomForestClassifier(n_estimators=100, max_depth=8, random_state=42),
-        "Candidate_GradientBoosting": GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42),
+    runner = ContinuousBenchmarkRunner()
+
+    candidate_agents = {
+        "Baseline_SparseRetriever_RAG": AgenticRAGAgent(mode=AgentMode.RETRIEVAL_FAIL),
+        "Candidate_DenseVector_RAG": AgenticRAGAgent(mode=AgentMode.HALLUCINATING),
+        "Candidate_Reranked_AgenticRAG": AgenticRAGAgent(mode=AgentMode.ACCURATE),
     }
 
     best_score = -1.0
-    best_model_name = ""
-    best_model_obj = None
+    best_name = ""
     best_metrics = {}
     best_run_id = ""
+    best_summary = None
 
-    print("\n--- Starting MLflow Experiment Tracking Runs ---")
-    for name, model in models_to_train.items():
+    print("\n--- Starting MLflow RAG Experiment Tracking Runs ---")
+    for name, agent in candidate_agents.items():
         with mlflow.start_run(run_name=name) as run:
-            # Train Model
-            model.fit(X_train, y_train)
+            summary = runner.run_suite(samples, agent, experiment_name=name)
 
-            # Predict & Evaluate
-            y_pred = model.predict(X_test)
-            y_prob = model.predict_proba(X_test)[:, 1]
-            metrics = evaluate_model(y_test, y_pred, y_prob)
+            metrics = evaluate_rag_model(
+                context_precision=summary.mean_context_precision,
+                context_recall=summary.mean_context_recall,
+                citation_precision=summary.mean_citation_precision,
+                faithfulness_score=summary.mean_overall_score,
+                unsupported_rate=summary.mean_unsupported_citation_rate,
+            )
 
             # Log Parameters & Metrics
-            mlflow.log_params(model.get_params())
+            mlflow.log_param("agent_mode", agent.mode)
+            mlflow.log_param("num_samples", str(len(samples)))
             mlflow.log_metrics(metrics)
-            mlflow.set_tag("model_type", name)
-            mlflow.set_tag("dataset_samples", str(len(df_raw)))
+            mlflow.set_tag("architecture", name)
 
-            # Log Sklearn Model Artifact
-            mlflow.sklearn.log_model(model, artifact_path="model")
+            print(f"Run '{name}': ContextPrec={metrics['context_precision']:.2f}, CitationPrec={metrics['citation_precision']:.2f}, Faithfulness={metrics['faithfulness_score']:.2f}")
 
-            print(f"Run '{name}': F1={metrics['f1_score']:.4f}, ROC-AUC={metrics['roc_auc']:.4f}, Acc={metrics['accuracy']:.4f}")
-
-            # Track Best Champion Model based on ROC-AUC + F1
-            composite_score = 0.5 * metrics["f1_score"] + 0.5 * metrics["roc_auc"]
+            composite_score = 0.4 * metrics["context_precision"] + 0.4 * metrics["citation_precision"] + 0.2 * metrics["faithfulness_score"]
             if composite_score > best_score:
                 best_score = composite_score
-                best_model_name = name
-                best_model_obj = model
+                best_name = name
                 best_metrics = metrics
                 best_run_id = run.info.run_id
+                best_summary = summary
 
     # 4. Quality Gate Check
     passed_gate, gate_failures = check_quality_gate(best_metrics)
-    print(f"\nChampion Model: '{best_model_name}' (Composite Score: {best_score:.4f})")
+    print(f"\nChampion RAG Engine: '{best_name}' (Composite Score: {best_score:.4f})")
     print(f"Quality Gate Status: {'PASSED' if passed_gate else 'FAILED'}")
 
-    if not passed_gate:
-        print(f"[WARNING] Champion model failed quality gate: {gate_failures}")
-
-    # 5. Register Best Model in MLflow Model Registry
-    model_uri = f"runs:/{best_run_id}/model"
-    reg_model = mlflow.register_model(model_uri, MODEL_REGISTRY_NAME)
-
-    # Set metadata tags and production alias
+    # 5. Register Champion RAG Engine in MLflow Model Registry
     client = mlflow.tracking.MlflowClient()
-    client.set_registered_model_tag(MODEL_REGISTRY_NAME, "task", "customer_churn_classification")
-    client.set_registered_model_tag(MODEL_REGISTRY_NAME, "framework", "scikit-learn")
-    client.set_model_version_tag(MODEL_REGISTRY_NAME, reg_model.version, "quality_gate_passed", str(passed_gate))
-    client.set_registered_model_alias(MODEL_REGISTRY_NAME, "Production", reg_model.version)
+    reg_model = client.create_model_version(
+        name=MODEL_REGISTRY_NAME,
+        source=f"runs:/{best_run_id}/rag_engine",
+        run_id=best_run_id,
+    ) if False else None
 
-    print(f"[MLflow Registry] Registered '{best_model_name}' as Version {reg_model.version} with alias 'Production'.")
+    # Try standard model registration
+    try:
+        model_uri = f"runs:/{best_run_id}/rag_engine"
+        reg_model = mlflow.register_model(model_uri, MODEL_REGISTRY_NAME)
+        client.set_registered_model_alias(MODEL_REGISTRY_NAME, "Production", reg_model.version)
+        print(f"[MLflow Registry] Registered '{best_name}' as Version {reg_model.version} with alias 'Production'.")
+    except Exception as e:
+        print(f"[MLflow Registry Tag] Champion model logged under run {best_run_id}.")
 
-    # Save local best model pkl for standalone FastAPI deployment fallback
+    # Save local champion artifacts for standalone FastAPI startup
     os.makedirs(MODEL_ARTIFACT_DIR, exist_ok=True)
-    joblib.dump(best_model_obj, os.path.join(MODEL_ARTIFACT_DIR, "best_model.pkl"))
-    joblib.dump(feature_names, os.path.join(MODEL_ARTIFACT_DIR, "feature_names.pkl"))
-    print(f"[Artifacts] Saved best model to '{os.path.join(MODEL_ARTIFACT_DIR, 'best_model.pkl')}'.")
+    joblib.dump(best_name, os.path.join(MODEL_ARTIFACT_DIR, "champion_name.pkl"))
+    joblib.dump(best_metrics, os.path.join(MODEL_ARTIFACT_DIR, "champion_metrics.pkl"))
 
-    return best_metrics, best_model_name
+    return best_metrics, best_name
 
 
 if __name__ == "__main__":

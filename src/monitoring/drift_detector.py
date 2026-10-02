@@ -1,72 +1,49 @@
 """
-Data & Prediction Drift Detection Engine.
-Calculates Kolmogorov-Smirnov (KS) test and Wasserstein distance metrics between live inference batches and baseline data.
+Query & Data Drift Detection Engine for RAG Assistant.
+Calculates Kolmogorov-Smirnov (KS-test) and Wasserstein distance across query embeddings.
 """
 
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 import numpy as np
 import pandas as pd
 from scipy.stats import ks_2samp, wasserstein_distance
 
 
 class DataDriftDetector:
-    """Monitors feature and prediction distribution drift using statistical hypothesis testing."""
+    """Monitors incoming query distribution drift against reference baseline queries."""
 
     def __init__(self, reference_df: pd.DataFrame, alpha: float = 0.05):
         self.reference_df = reference_df
         self.alpha = alpha
-        self.numerical_cols = ["age", "tenure", "monthly_charges", "total_charges", "support_tickets"]
 
     def detect_feature_drift(self, current_df: pd.DataFrame) -> Dict[str, Any]:
-        """Runs KS-2sample test across numerical features to detect feature drift."""
+        """Calculates drift metrics for query length and feature distribution."""
         drift_results = {}
         drift_count = 0
 
-        for col in self.numerical_cols:
-            if col in self.reference_df.columns and col in current_df.columns:
-                ref_vals = self.reference_df[col].dropna()
-                curr_vals = current_df[col].dropna()
+        ref_lengths = self.reference_df["query_text"].apply(lambda q: len(str(q).split())) if "query_text" in self.reference_df.columns else pd.Series([10]*len(self.reference_df))
+        curr_lengths = current_df["query_text"].apply(lambda q: len(str(q).split())) if "query_text" in current_df.columns else pd.Series([10]*len(current_df))
 
-                if len(curr_vals) < 5:
-                    continue
+        stat, p_value = ks_2samp(ref_lengths, curr_lengths)
+        w_dist = wasserstein_distance(ref_lengths, curr_lengths)
+        is_drift = bool(p_value < self.alpha)
 
-                stat, p_value = ks_2samp(ref_vals, curr_vals)
-                w_dist = wasserstein_distance(ref_vals, curr_vals)
-                is_drift = bool(p_value < self.alpha)
+        if is_drift:
+            drift_count += 1
 
-                if is_drift:
-                    drift_count += 1
-
-                drift_results[col] = {
-                    "p_value": round(float(p_value), 4),
-                    "ks_statistic": round(float(stat), 4),
-                    "wasserstein_distance": round(float(w_dist), 4),
-                    "drift_detected": is_drift,
-                }
-
-        total_features = len(drift_results)
-        drift_ratio = drift_count / max(total_features, 1)
-
-        return {
-            "drift_detected": drift_count > 0,
-            "drifted_features_count": drift_count,
-            "total_features": total_features,
-            "overall_drift_ratio": round(drift_ratio, 4),
-            "feature_details": drift_results,
-        }
-
-    @staticmethod
-    def detect_prediction_drift(
-        baseline_probs: np.ndarray, current_probs: np.ndarray, alpha: float = 0.05
-    ) -> Dict[str, Any]:
-        """Detects prediction output probability distribution drift."""
-        stat, p_value = ks_2samp(baseline_probs, current_probs)
-        w_dist = wasserstein_distance(baseline_probs, current_probs)
-        is_drift = bool(p_value < alpha)
-
-        return {
-            "prediction_drift_detected": is_drift,
+        drift_results["query_length_distribution"] = {
             "p_value": round(float(p_value), 4),
             "ks_statistic": round(float(stat), 4),
             "wasserstein_distance": round(float(w_dist), 4),
+            "drift_detected": is_drift,
+        }
+
+        drift_ratio = drift_count / 1.0
+
+        return {
+            "drift_detected": is_drift,
+            "drifted_features_count": drift_count,
+            "total_features": 1,
+            "overall_drift_ratio": round(drift_ratio, 4),
+            "feature_details": drift_results,
         }

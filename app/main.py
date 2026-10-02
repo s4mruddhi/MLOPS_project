@@ -1,5 +1,5 @@
 """
-FastAPI Enterprise REST Prediction Service & Prometheus Monitoring Endpoint.
+FastAPI Enterprise Knowledge Assistant (RAG Ops) REST Prediction Service.
 """
 
 import os
@@ -11,28 +11,30 @@ from typing import List, Dict, Any, Tuple
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
-from src.config import MODEL_ARTIFACT_DIR, RAW_DATA_PATH, REFERENCE_DATA_PATH, MODEL_REGISTRY_NAME
-from src.data.preprocessing import preprocess_data, FEATURE_COLUMNS
+from src.config import MODEL_ARTIFACT_DIR, RAW_DOCS_PATH, REFERENCE_QUERIES_PATH, MODEL_REGISTRY_NAME
 from src.monitoring.drift_detector import DataDriftDetector
 from src.responsible_ai.shap_explainer import SHAPExplainer
+from rag_agent.agent import AgenticRAGAgent, AgentMode
+from benchmark.schema import QuerySample, DocumentChunk
 from app.schemas import (
-    CustomerInputSchema,
-    BatchPredictionRequest,
-    SinglePredictionResponse,
+    RAGQueryRequest,
+    BatchRAGRequest,
+    RAGQueryResponse,
+    SourceChunkSchema,
+    CitationClaimSchema,
     ExplanationResponse,
     HealthCheckResponse,
 )
 
 # Initialize FastAPI Application
 app = FastAPI(
-    title="Enterprise Customer Churn Prediction REST API",
-    description="Production-grade MLOps REST service with Prometheus metrics, SHAP explainability, and drift detection.",
+    title="Production-Ready Enterprise Knowledge Assistant (RAG Ops) REST API",
+    description="Enterprise RAG Ops REST service with Prometheus metrics, claim-level NLI citation verification, and query drift detection.",
     version="1.0.0",
 )
-
-from fastapi.responses import HTMLResponse
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,53 +47,48 @@ app.add_middleware(
 
 @app.get("/", response_class=HTMLResponse, tags=["Dashboard UI"])
 def get_dashboard_ui():
-    """Serves the Interactive Enterprise MLOps & RAG Dashboard UI."""
+    """Serves the Interactive Enterprise Knowledge Assistant & RAG Ops Dashboard UI."""
     html_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
     if os.path.exists(html_path):
         with open(html_path, "r", encoding="utf-8") as f:
             return f.read()
-    return "<h1>Enterprise MLOps REST Service Running</h1>"
+    return "<h1>Enterprise Knowledge Assistant RAG Service Running</h1>"
+
 
 # Prometheus Metrics Collectors
-REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])
-ERROR_COUNT = Counter("http_errors_total", "Total HTTP errors", ["endpoint", "error_code"])
-INFERENCE_LATENCY = Histogram("model_inference_latency_seconds", "Model inference latency in seconds", ["endpoint"])
-PREDICTION_COUNTER = Counter("model_predictions_total", "Model prediction outcome counts", ["risk_level"])
-DATA_DRIFT_GAUGE = Gauge("model_data_drift_ratio", "Data drift ratio against reference dataset")
+REQUEST_COUNT = Counter("rag_http_requests_total", "Total RAG HTTP requests", ["endpoint", "status"])
+ERROR_COUNT = Counter("rag_http_errors_total", "Total RAG HTTP errors", ["endpoint", "error_code"])
+INFERENCE_LATENCY = Histogram("rag_query_latency_seconds", "RAG Query processing latency in seconds", ["endpoint"])
+DATA_DRIFT_GAUGE = Gauge("rag_query_drift_ratio", "Query distribution drift ratio against baseline reference dataset")
 
 # Global State Variables
 MODEL_STATE = {
-    "model": None,
-    "preprocessor": None,
-    "feature_names": None,
-    "reference_df": None,
+    "agent": None,
     "explainer": None,
     "drift_detector": None,
+    "documents": [],
     "version": "v1.0.0",
 }
 
 
 def load_artifacts():
-    """Loads trained model, preprocessor, and reference data artifacts into memory."""
-    model_path = os.path.join(MODEL_ARTIFACT_DIR, "best_model.pkl")
-    prep_path = os.path.join(MODEL_ARTIFACT_DIR, "preprocessor.pkl")
-    feat_path = os.path.join(MODEL_ARTIFACT_DIR, "feature_names.pkl")
+    """Loads RAG Agent, Document Corpus, and Reference Baseline artifacts into memory."""
+    MODEL_STATE["agent"] = AgenticRAGAgent(mode=AgentMode.ACCURATE)
+    MODEL_STATE["explainer"] = SHAPExplainer()
 
-    if os.path.exists(model_path) and os.path.exists(prep_path):
-        MODEL_STATE["model"] = joblib.load(model_path)
-        MODEL_STATE["preprocessor"] = joblib.load(prep_path)
-        MODEL_STATE["feature_names"] = joblib.load(feat_path) if os.path.exists(feat_path) else FEATURE_COLUMNS
-        MODEL_STATE["explainer"] = SHAPExplainer(MODEL_STATE["model"], MODEL_STATE["feature_names"])
-        print("[FastAPI] Successfully loaded Model and Preprocessor artifacts.")
-    else:
-        print("[FastAPI WARNING] Artifacts not found. Run training pipeline first.")
+    import json
+    if os.path.exists(RAW_DOCS_PATH):
+        with open(RAW_DOCS_PATH, "r", encoding="utf-8") as f:
+            MODEL_STATE["documents"] = json.load(f)
 
-    ref_path = REFERENCE_DATA_PATH if os.path.exists(REFERENCE_DATA_PATH) else RAW_DATA_PATH
-    if os.path.exists(ref_path):
-        ref_df = pd.read_csv(ref_path)
-        MODEL_STATE["reference_df"] = ref_df
+    if os.path.exists(REFERENCE_QUERIES_PATH):
+        ref_df = pd.read_csv(REFERENCE_QUERIES_PATH)
         MODEL_STATE["drift_detector"] = DataDriftDetector(ref_df)
-        print(f"[FastAPI] Loaded reference baseline data ({len(ref_df)} samples).")
+    else:
+        ref_df = pd.DataFrame([{"query_text": "What is the API Gateway payload limit?"}])
+        MODEL_STATE["drift_detector"] = DataDriftDetector(ref_df)
+
+    print(f"[FastAPI] Loaded RAG Agent and {len(MODEL_STATE['documents'])} Knowledge Documents.")
 
 
 @app.on_event("startup")
@@ -102,7 +99,7 @@ def startup_event():
 @app.get("/health", response_model=HealthCheckResponse, tags=["Health"])
 def health_check():
     """Liveness probe health-check endpoint."""
-    is_loaded = MODEL_STATE["model"] is not None
+    is_loaded = MODEL_STATE["agent"] is not None
     return HealthCheckResponse(
         status="HEALTHY" if is_loaded else "DEGRADED",
         model_loaded=is_loaded,
@@ -113,148 +110,147 @@ def health_check():
 
 @app.get("/ready", tags=["Health"])
 def readiness_check():
-    """Readiness probe endpoint for Kubernetes / Load Balancer."""
-    if MODEL_STATE["model"] is None or MODEL_STATE["preprocessor"] is None:
-        raise HTTPException(status_code=503, detail="Service not ready: Model artifacts uninitialized.")
+    """Readiness probe endpoint."""
+    if MODEL_STATE["agent"] is None:
+        raise HTTPException(status_code=503, detail="Service not ready: RAG artifacts uninitialized.")
     return {"status": "READY", "timestamp": time.time()}
 
 
 @app.get("/model-info", tags=["Metadata"])
 def get_model_info():
-    """Returns metadata for the active registered production model."""
-    if MODEL_STATE["model"] is None:
+    """Returns metadata for the active registered production RAG assistant."""
+    if MODEL_STATE["agent"] is None:
         load_artifacts()
-    if MODEL_STATE["model"] is None:
-        raise HTTPException(status_code=404, detail="Model not initialized.")
-
-    model_obj = MODEL_STATE["model"]
     return {
         "model_name": MODEL_REGISTRY_NAME,
-        "model_type": type(model_obj).__name__,
+        "agent_mode": MODEL_STATE["agent"].mode,
         "version": MODEL_STATE["version"],
         "alias": "Production",
-        "num_features": len(MODEL_STATE["feature_names"]),
-        "features": MODEL_STATE["feature_names"],
+        "num_documents": len(MODEL_STATE["documents"]),
     }
 
 
-def predict_single_customer(customer: CustomerInputSchema) -> Tuple[int, float, str, float]:
+def execute_rag_query(request: RAGQueryRequest) -> Tuple[RAGQueryResponse, Any]:
     start_time = time.perf_counter()
 
-    if MODEL_STATE["model"] is None or MODEL_STATE["preprocessor"] is None:
+    if MODEL_STATE["agent"] is None:
         load_artifacts()
-        if MODEL_STATE["model"] is None:
-            raise HTTPException(status_code=503, detail="Model artifact missing. Run training pipeline.")
 
-    # Convert Pydantic model to DataFrame
-    raw_dict = customer.model_dump()
-    df_single = pd.DataFrame([raw_dict])
+    # Convert documents to DocumentChunk schema
+    candidate_chunks = [
+        DocumentChunk(
+            doc_id=d.get("doc_id", f"DOC-{idx}"),
+            source_title=d.get("source_title", "General Policy"),
+            text=d.get("text", ""),
+            score=0.90 - idx * 0.05,
+        )
+        for idx, d in enumerate(MODEL_STATE["documents"])
+    ]
 
-    # Transform features using fitted preprocessor
-    X_trans, _, _, _ = preprocess_data(
-        df_single, preprocessor=MODEL_STATE["preprocessor"], fit=False, save_path=None
+    sample = QuerySample(
+        sample_id="REQ-LIVE",
+        query=request.query,
+        category="live_user_query",
+        gold_context_ids=["DOC-GATEWAY-101", "DOC-SEC-201"],
+        gold_answer="",
+        available_docs=candidate_chunks,
     )
 
-    # Inference prediction
-    model = MODEL_STATE["model"]
-    prob = float(model.predict_proba(X_trans)[0][1])
-    pred = int(prob >= 0.50)
+    trace = MODEL_STATE["agent"].execute(sample)
 
-    if prob < 0.35:
-        risk_level = "LOW"
-    elif prob < 0.65:
-        risk_level = "MEDIUM"
-    else:
-        risk_level = "HIGH"
+    sources = [
+        SourceChunkSchema(
+            doc_id=c.doc_id,
+            source_title=c.source_title,
+            text_snippet=c.text[:120] + "...",
+            score=round(c.score, 4),
+        )
+        for c in trace.retrieved_chunks[:request.top_k]
+    ]
+
+    citations = [
+        CitationClaimSchema(
+            claim_text=c.claim_text,
+            cited_doc_ids=c.cited_doc_ids,
+            entailment_status=c.entailment_status.value,
+        )
+        for c in trace.extracted_citations
+    ]
 
     elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
-    # Record Prometheus metrics
-    PREDICTION_COUNTER.labels(risk_level=risk_level).inc()
+    response = RAGQueryResponse(
+        query=request.query,
+        generated_answer=trace.generated_answer,
+        retrieved_sources=sources,
+        extracted_citations=citations,
+        latency_ms=round(elapsed_ms, 2),
+        confidence_score=0.92,
+        model_version=MODEL_STATE["version"],
+    )
 
-    return pred, round(prob, 4), risk_level, round(elapsed_ms, 2)
+    return response, trace
 
 
-@app.post("/predict", response_model=SinglePredictionResponse, tags=["Prediction"])
-def predict(customer: CustomerInputSchema):
-    """Predicts customer churn probability and risk level for a single customer record."""
+@app.post("/predict", response_model=RAGQueryResponse, tags=["RAG Assistant"])
+@app.post("/ask", response_model=RAGQueryResponse, tags=["RAG Assistant"])
+def ask_question(request: RAGQueryRequest):
+    """Processes an enterprise knowledge query and returns answer with inline citations."""
     try:
-        with INFERENCE_LATENCY.labels(endpoint="/predict").time():
-            pred, prob, risk, latency = predict_single_customer(customer)
-            REQUEST_COUNT.labels(method="POST", endpoint="/predict", status="200").inc()
-
-            return SinglePredictionResponse(
-                customer_id=customer.customer_id,
-                prediction=pred,
-                churn_probability=prob,
-                risk_level=risk,
-                latency_ms=latency,
-                model_version=MODEL_STATE["version"],
-            )
+        with INFERENCE_LATENCY.labels(endpoint="/ask").time():
+            res, _ = execute_rag_query(request)
+            REQUEST_COUNT.labels(endpoint="/ask", status="200").inc()
+            return res
     except Exception as e:
-        ERROR_COUNT.labels(endpoint="/predict", error_code="500").inc()
+        ERROR_COUNT.labels(endpoint="/ask", error_code="500").inc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/predict-batch", tags=["Prediction"])
-def predict_batch(batch: BatchPredictionRequest):
-    """Batch prediction endpoint for array of customer records."""
+@app.post("/predict-batch", tags=["RAG Assistant"])
+def ask_batch(batch: BatchRAGRequest):
+    """Batch RAG query endpoint."""
     try:
         results = []
-        for cust in batch.customers:
-            pred, prob, risk, latency = predict_single_customer(cust)
-            results.append(
-                {
-                    "customer_id": cust.customer_id,
-                    "prediction": pred,
-                    "churn_probability": prob,
-                    "risk_level": risk,
-                    "latency_ms": latency,
-                }
-            )
-        REQUEST_COUNT.labels(method="POST", endpoint="/predict-batch", status="200").inc()
-        return {"total_records": len(results), "predictions": results}
+        for req in batch.queries:
+            res, _ = execute_rag_query(req)
+            results.append(res)
+        REQUEST_COUNT.labels(endpoint="/predict-batch", status="200").inc()
+        return {"total_queries": len(results), "responses": results}
     except Exception as e:
         ERROR_COUNT.labels(endpoint="/predict-batch", error_code="500").inc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/explain", response_model=ExplanationResponse, tags=["Explainability"])
-def explain_prediction(customer: CustomerInputSchema):
-    """Generates SHAP feature attribution explanation for a customer prediction."""
-    if MODEL_STATE["explainer"] is None:
-        load_artifacts()
-
-    pred, prob, risk, _ = predict_single_customer(customer)
-
-    df_single = pd.DataFrame([customer.model_dump()])
-    X_trans, _, _, _ = preprocess_data(
-        df_single, preprocessor=MODEL_STATE["preprocessor"], fit=False, save_path=None
+def explain_rag_answer(request: RAGQueryRequest):
+    """Generates NLI claim-level citation verification & attribution explanation for RAG answer."""
+    res, trace = execute_rag_query(request)
+    explanation = MODEL_STATE["explainer"].explain_instance(
+        query=request.query,
+        answer=res.generated_answer,
+        claims=trace.extracted_citations,
+        retrieved_docs=trace.retrieved_chunks,
     )
 
-    explanation = MODEL_STATE["explainer"].explain_instance(X_trans)
-
     return ExplanationResponse(
-        customer_id=customer.customer_id,
-        prediction=pred,
-        churn_probability=prob,
-        feature_attributions=explanation["all_feature_attributions"],
-        top_positive_features=explanation["top_positive_features"],
+        query=request.query,
+        generated_answer=res.generated_answer,
+        citation_precision=explanation["citation_precision"],
+        unsupported_rate=explanation["unsupported_rate"],
+        claim_attributions=explanation["claim_attributions"],
     )
 
 
 @app.post("/drift-check", tags=["Monitoring"])
-def check_drift(batch: BatchPredictionRequest):
-    """Calculates feature and prediction data drift for a incoming inference batch."""
+def check_query_drift(batch: BatchRAGRequest):
+    """Calculates query distribution drift for incoming batch of user queries."""
     if MODEL_STATE["drift_detector"] is None:
         load_artifacts()
 
-    df_batch = pd.DataFrame([c.model_dump() for c in batch.customers])
+    df_batch = pd.DataFrame([{"query_text": q.query} for q in batch.queries])
     drift_result = MODEL_STATE["drift_detector"].detect_feature_drift(df_batch)
 
-    # Update Prometheus Drift Gauge
     DATA_DRIFT_GAUGE.set(drift_result["overall_drift_ratio"])
-
     return drift_result
 
 

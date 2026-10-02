@@ -1,65 +1,57 @@
 """
-FastAPI Request & Response Data Validation Schemas (Pydantic v2).
+FastAPI Request & Response Data Validation Schemas for Enterprise RAG Assistant.
 """
 
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field, field_validator
 
 
-class CustomerInputSchema(BaseModel):
-    customer_id: str = Field(..., example="CUST-1001", description="Unique customer identifier")
-    age: int = Field(..., ge=18, le=120, example=35, description="Customer age (18-120)")
-    gender: str = Field(..., example="Female", description="Gender ('Male' or 'Female')")
-    tenure: int = Field(..., ge=0, le=120, example=24, description="Tenure in months")
-    monthly_charges: float = Field(..., gt=0.0, example=65.50, description="Monthly charges amount")
-    total_charges: float = Field(..., gt=0.0, example=1572.00, description="Total lifetime charges")
-    contract: str = Field(..., example="One year", description="Contract type ('Month-to-month', 'One year', 'Two year')")
-    payment_method: str = Field(..., example="Credit card", description="Payment method")
-    support_tickets: int = Field(..., ge=0, example=1, description="Number of support tickets filed")
+class RAGQueryRequest(BaseModel):
+    query: str = Field(..., example="What is the maximum allowed API request payload size?", description="Enterprise knowledge query")
+    top_k: int = Field(default=3, ge=1, le=10, description="Top-K documents to retrieve")
+    include_citations: bool = Field(default=True, description="Whether to include inline citations [DOC-XXX]")
 
-    @field_validator("gender")
+    @field_validator("query")
     @classmethod
-    def validate_gender(cls, v: str) -> str:
-        if v not in ["Male", "Female"]:
-            raise ValueError("gender must be 'Male' or 'Female'")
-        return v
-
-    @field_validator("contract")
-    @classmethod
-    def validate_contract(cls, v: str) -> str:
-        allowed = ["Month-to-month", "One year", "Two year"]
-        if v not in allowed:
-            raise ValueError(f"contract must be one of {allowed}")
-        return v
-
-    @field_validator("payment_method")
-    @classmethod
-    def validate_payment(cls, v: str) -> str:
-        allowed = ["Electronic check", "Mailed check", "Bank transfer", "Credit card"]
-        if v not in allowed:
-            raise ValueError(f"payment_method must be one of {allowed}")
+    def validate_query(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Query string cannot be empty")
         return v
 
 
-class BatchPredictionRequest(BaseModel):
-    customers: List[CustomerInputSchema]
+class BatchRAGRequest(BaseModel):
+    queries: List[RAGQueryRequest]
 
 
-class SinglePredictionResponse(BaseModel):
-    customer_id: str
-    prediction: int = Field(..., description="0 for Retain, 1 for Churn")
-    churn_probability: float = Field(..., description="Probability of customer churn (0.0 to 1.0)")
-    risk_level: str = Field(..., description="'LOW', 'MEDIUM', or 'HIGH'")
-    latency_ms: float = Field(..., description="Inference latency in milliseconds")
+class SourceChunkSchema(BaseModel):
+    doc_id: str
+    source_title: str
+    text_snippet: str
+    score: float
+
+
+class CitationClaimSchema(BaseModel):
+    claim_text: str
+    cited_doc_ids: List[str]
+    entailment_status: str
+
+
+class RAGQueryResponse(BaseModel):
+    query: str
+    generated_answer: str
+    retrieved_sources: List[SourceChunkSchema]
+    extracted_citations: List[CitationClaimSchema]
+    latency_ms: float
+    confidence_score: float
     model_version: str
 
 
 class ExplanationResponse(BaseModel):
-    customer_id: str
-    prediction: int
-    churn_probability: float
-    feature_attributions: Dict[str, float]
-    top_positive_features: Dict[str, float]
+    query: str
+    generated_answer: str
+    citation_precision: float
+    unsupported_rate: float
+    claim_attributions: Dict[str, str]
 
 
 class HealthCheckResponse(BaseModel):

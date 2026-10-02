@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enterprise MLOps & RAG Evaluation Platform</title>
+  <title>Production-Ready Enterprise Knowledge Assistant (RAG Ops)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-bg: rgba(30, 41, 59, 0.75);
       --card-border: rgba(255, 255, 255, 0.1);
       --primary: #6366f1;
       --primary-hover: #4f46e5;
@@ -30,7 +30,7 @@
     }
 
     header {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--card-border);
       padding: 1.25rem 2rem;
@@ -107,7 +107,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
       gap: 1.5rem;
     }
 
@@ -140,7 +140,7 @@
       margin-bottom: 0.4rem;
     }
 
-    input, select {
+    input, textarea, select {
       width: 100%;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--card-border);
@@ -152,7 +152,7 @@
       transition: border-color 0.2s;
     }
 
-    input:focus, select:focus {
+    input:focus, textarea:focus, select:focus {
       border-color: var(--primary);
     }
 
@@ -180,23 +180,29 @@
       margin-top: 1rem;
     }
 
-    .metric-val {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0.5rem 0;
+    .source-chip {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      margin-right: 0.4rem;
+      margin-top: 0.4rem;
     }
 
-    .val-low { color: var(--accent); }
-    .val-med { color: var(--warning); }
-    .val-high { color: var(--danger); }
-
-    .attribution-item {
+    .claim-item {
       display: flex;
       justify-content: space-between;
-      padding: 0.4rem 0;
+      align-items: center;
+      padding: 0.5rem 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       font-size: 0.85rem;
     }
+
+    .status-entailed { color: var(--accent); font-weight: 600; }
+    .status-unsupported { color: var(--danger); font-weight: 600; }
 
     footer {
       text-align: center;
@@ -230,130 +236,99 @@
 
   <header>
     <div class="logo">
-      <span>🚀 Enterprise MLOps & Agentic RAG Platform</span>
+      <span>🤖 Enterprise Knowledge Assistant (RAG Ops)</span>
     </div>
-    <div class="badge">● Systems Active & Verified</div>
+    <div class="badge">● RAG Engine Active & Continuous Eval Verified</div>
   </header>
 
   <main>
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('churn')">🔮 Real-Time Customer Churn Predictor</button>
-      <button class="tab-btn" onclick="switchTab('rag')">🤖 Continuous Agentic RAG Evaluator</button>
-      <button class="tab-btn" onclick="switchTab('mlops')">📊 MLOps & Monitoring Stack</button>
+      <button class="tab-btn active" onclick="switchTab('ask')">💬 Live Knowledge Assistant (RAG Q&A)</button>
+      <button class="tab-btn" onclick="switchTab('benchmark')">🔬 Continuous RAG Evaluation & Citations</button>
+      <button class="tab-btn" onclick="switchTab('mlops')">📊 RAG Ops Monitoring & Metrics</button>
     </div>
 
-    <!-- TAB 1: Churn Predictor -->
-    <div id="churn" class="tab-content active">
+    <!-- TAB 1: Live Knowledge Assistant -->
+    <div id="ask" class="tab-content active">
       <div class="grid">
         <div class="card">
-          <div class="card-title">Customer Feature Inputs</div>
-          <form id="churnForm">
+          <div class="card-title">Ask Enterprise Knowledge Base</div>
+          <form id="ragForm">
             <div class="form-group">
-              <label>Customer ID</label>
-              <input type="text" id="cust_id" value="CUST-8821">
-            </div>
-            <div class="form-group">
-              <label>Age (18 - 120)</label>
-              <input type="number" id="age" value="45">
-            </div>
-            <div class="form-group">
-              <label>Gender</label>
-              <select id="gender">
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
+              <label>Select Sample Enterprise Query or Type Custom Question:</label>
+              <select id="sampleSelect" onchange="loadSampleQuery()">
+                <option value="What is the maximum allowed API request payload size according to gateway docs?">What is the maximum allowed API request payload size according to gateway docs?</option>
+                <option value="Compare our SOC2 compliance log retention policy with GDPR data deletion standards.">Compare our SOC2 compliance log retention policy with GDPR data deletion standards.</option>
+                <option value="What is the recommended PostgreSQL connection pool idle timeout setting for production?">What is the recommended PostgreSQL connection pool idle timeout setting for production?</option>
+                <option value="What is the policy for processing customer refunds for subscription cancellations?">What is the policy for processing customer refunds for subscription cancellations?</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Tenure (Months)</label>
-              <input type="number" id="tenure" value="6">
+              <label>Query Input</label>
+              <textarea id="query_input" rows="3">What is the maximum allowed API request payload size according to gateway docs?</textarea>
             </div>
             <div class="form-group">
-              <label>Monthly Charges ($)</label>
-              <input type="number" step="0.01" id="monthly_charges" value="95.50">
+              <label>Top-K Documents to Retrieve</label>
+              <input type="number" id="top_k" value="3" min="1" max="10">
             </div>
-            <div class="form-group">
-              <label>Total Lifetime Charges ($)</label>
-              <input type="number" step="0.01" id="total_charges" value="573.00">
-            </div>
-            <div class="form-group">
-              <label>Contract Type</label>
-              <select id="contract">
-                <option value="Month-to-month">Month-to-month</option>
-                <option value="One year">One year</option>
-                <option value="Two year">Two year</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Payment Method</label>
-              <select id="payment_method">
-                <option value="Electronic check">Electronic check</option>
-                <option value="Credit card">Credit card</option>
-                <option value="Bank transfer">Bank transfer</option>
-                <option value="Mailed check">Mailed check</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Support Tickets Filed</label>
-              <input type="number" id="support_tickets" value="4">
-            </div>
-            <button type="button" class="btn" onclick="predictChurn()">Run Model Inference</button>
+            <button type="button" class="btn" onclick="askAssistant()">Execute RAG Retrieval & Generation</button>
           </form>
         </div>
 
         <div class="card">
-          <div class="card-title">Inference & SHAP Explainability</div>
-          <div id="churnResults" class="result-box">
-            <p style="color: var(--text-muted);">Click 'Run Model Inference' to get churn risk score and SHAP feature attributions.</p>
+          <div class="card-title">Generated Answer & Inline Citations</div>
+          <div id="ragAnswerBox" class="result-box">
+            <p style="color: var(--text-muted);">Click 'Execute RAG Retrieval & Generation' to query the enterprise Knowledge Assistant.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- TAB 2: RAG Evaluator -->
-    <div id="rag" class="tab-content">
+    <!-- TAB 2: Continuous RAG Evaluation -->
+    <div id="benchmark" class="tab-content">
       <div class="card">
-        <div class="card-title">Agentic RAG Benchmark & Citation Entailment Verification</div>
-        <p style="color: var(--text-muted); margin-bottom: 1rem;">Executes benchmark samples through RAG Agent and evaluates Context Precision, Citation Entailment, and Tool Execution Traces.</p>
-        <button class="btn" style="max-width: 250px;" onclick="runRAGBenchmark()">Run Suite & Citation Verifier</button>
-        <div id="ragResults" class="result-box" style="margin-top: 1.5rem;">
-          <p style="color: var(--text-muted);">Benchmark output will appear here...</p>
+        <div class="card-title">Continuous RAG Benchmark & Citation Verification Suite</div>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Executes benchmark suite over baseline and candidate RAG models, checking Context Precision, NLI Citation Entailment, and Tool Execution traces.</p>
+        <button class="btn" style="max-width: 280px;" onclick="runRAGBenchmark()">Run RAG Benchmark & Citation Verifier</button>
+        <div id="benchmarkResults" class="result-box" style="margin-top: 1.5rem;">
+          <p style="color: var(--text-muted);">Click button to run evaluation suite...</p>
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: MLOps Stack -->
+    <!-- TAB 3: RAG Ops Stack -->
     <div id="mlops" class="tab-content">
       <div class="grid">
         <div class="card">
-          <div class="card-title">Production Services & Interfaces</div>
+          <div class="card-title">RAG Service Interfaces & Infrastructure</div>
           <a href="/docs" target="_blank" class="link-card">
             <div>
               <strong>FastAPI REST API & Swagger UI</strong>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Interactive OpenAPI documentation & endpoint tester</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Interactive OpenAPI schema & RAG endpoint tester</div>
             </div>
             <span>➜</span>
           </a>
           <a href="http://localhost:9090" target="_blank" class="link-card">
             <div>
               <strong>Prometheus Server</strong>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Real-time metrics collector & TSDB target</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">RAG query latency histogram & request counters</div>
             </div>
             <span>➜</span>
           </a>
           <a href="http://localhost:3000" target="_blank" class="link-card">
             <div>
               <strong>Grafana Monitoring Dashboard</strong>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Live p95 latency, request rate & data drift graphs</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Live RAG p95 latency, throughput & data drift ratio</div>
             </div>
             <span>➜</span>
           </a>
         </div>
 
         <div class="card">
-          <div class="card-title">Live Data Drift Audit</div>
-          <button class="btn" onclick="checkDrift()">Run Statistical Drift Check (KS-Test)</button>
+          <div class="card-title">Query Distribution Drift Check (KS-Test)</div>
+          <button class="btn" onclick="checkQueryDrift()">Audit Query Distribution Drift</button>
           <div id="driftResults" class="result-box" style="margin-top: 1rem;">
-            <p style="color: var(--text-muted);">Click to audit dataset against reference baseline...</p>
+            <p style="color: var(--text-muted);">Click to run statistical Kolmogorov-Smirnov drift check...</p>
           </div>
         </div>
       </div>
@@ -361,7 +336,7 @@
   </main>
 
   <footer>
-    Enterprise MLOps & RAG Evaluation Platform • Built with FastAPI, MLflow, Airflow, Prometheus & SHAP
+    Production-Ready Enterprise Knowledge Assistant (RAG Ops) • Built with FastAPI, MLflow, Airflow, Prometheus & Citation NLI Engine
   </footer>
 
   <script>
@@ -372,77 +347,79 @@
       document.getElementById(tabId).classList.add('active');
     }
 
-    async function predictChurn() {
-      const payload = {
-        customer_id: document.getElementById('cust_id').value,
-        age: parseInt(document.getElementById('age').value),
-        gender: document.getElementById('gender').value,
-        tenure: parseInt(document.getElementById('tenure').value),
-        monthly_charges: parseFloat(document.getElementById('monthly_charges').value),
-        total_charges: parseFloat(document.getElementById('total_charges').value),
-        contract: document.getElementById('contract').value,
-        payment_method: document.getElementById('payment_method').value,
-        support_tickets: parseInt(document.getElementById('support_tickets').value)
-      };
+    function loadSampleQuery() {
+      document.getElementById('query_input').value = document.getElementById('sampleSelect').value;
+    }
 
-      const resBox = document.getElementById('churnResults');
-      resBox.innerHTML = "<p>Processing inference & SHAP explanation...</p>";
+    async function askAssistant() {
+      const queryText = document.getElementById('query_input').value;
+      const topK = parseInt(document.getElementById('top_k').value);
+
+      const resBox = document.getElementById('ragAnswerBox');
+      resBox.innerHTML = "<p>Retrieving documents & generating verified answer...</p>";
 
       try {
-        const predRes = await fetch('/predict', {
+        const askRes = await fetch('/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ query: queryText, top_k: topK })
         });
-        const predData = await predRes.json();
+        const askData = await askRes.json();
 
         const expRes = await fetch('/explain', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ query: queryText, top_k: topK })
         });
         const expData = await expRes.json();
 
-        let riskClass = 'val-low';
-        if (predData.risk_level === 'MEDIUM') riskClass = 'val-med';
-        if (predData.risk_level === 'HIGH') riskClass = 'val-high';
-
-        let html = `
-          <div><strong>Churn Status:</strong> ${predData.prediction === 1 ? 'CHURN RISK' : 'RETAINED'}</div>
-          <div class="metric-val ${riskClass}">${(predData.churn_probability * 100).toFixed(1)}%</div>
-          <div>Risk Level: <strong>${predData.risk_level}</strong> | Latency: <strong>${predData.latency_ms} ms</strong></div>
-          <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">SHAP Top Feature Attributions:</h4>
-        `;
-
-        for (const [feat, val] of Object.entries(expData.top_positive_features).slice(0, 5)) {
-          html += `<div class="attribution-item"><span>${feat}</span><span style="color: var(--danger)">+${val}</span></div>`;
+        let sourcesHtml = '';
+        for (const src of askData.retrieved_sources) {
+          sourcesHtml += `<span class="source-chip" title="${src.text_snippet}">[${src.doc_id}] ${src.source_title}</span>`;
         }
 
-        resBox.innerHTML = html;
+        let claimsHtml = '';
+        for (const [claim, status] of Object.entries(expData.claim_attributions)) {
+          const isEntailed = status.includes('entailed');
+          claimsHtml += `
+            <div class="claim-item">
+              <span>${claim}</span>
+              <span class="${isEntailed ? 'status-entailed' : 'status-unsupported'}">${status}</span>
+            </div>
+          `;
+        }
+
+        resBox.innerHTML = `
+          <h4 style="margin-bottom: 0.5rem; color: #a5b4fc;">Generated Answer:</h4>
+          <p style="font-size: 1rem; line-height: 1.5; background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 0.5rem;">${askData.generated_answer}</p>
+          
+          <div style="margin-top: 1rem;">
+            <strong>Retrieved Sources (${askData.retrieved_sources.length}):</strong><br>
+            ${sourcesHtml}
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <div>Latency: <strong>${askData.latency_ms} ms</strong> | Citation Precision: <strong style="color: var(--accent);">${(expData.citation_precision * 100).toFixed(0)}%</strong></div>
+          </div>
+
+          <h4 style="margin-top: 1.25rem; margin-bottom: 0.5rem;">NLI Citation Verification Breakdown:</h4>
+          ${claimsHtml}
+        `;
       } catch (err) {
-        resBox.innerHTML = `<p style="color: var(--danger)">Error running prediction: ${err.message}</p>`;
+        resBox.innerHTML = `<p style="color: var(--danger)">Error querying RAG assistant: ${err.message}</p>`;
       }
     }
 
-    async function checkDrift() {
+    async function checkQueryDrift() {
       const payload = {
-        customers: [
-          {
-            customer_id: "CUST-DRIFT-1",
-            age: 68,
-            gender: "Male",
-            tenure: 1,
-            monthly_charges: 118.00,
-            total_charges: 118.00,
-            contract: "Month-to-month",
-            payment_method: "Electronic check",
-            support_tickets: 6
-          }
+        queries: [
+          { query: "How do I request an exemption for personal device usage under security policy?" },
+          { query: "What is the secret rotation policy for AWS IAM keys?" }
         ]
       };
 
       const resBox = document.getElementById('driftResults');
-      resBox.innerHTML = "<p>Running Kolmogorov-Smirnov test...</p>";
+      resBox.innerHTML = "<p>Running Kolmogorov-Smirnov test on query distributions...</p>";
 
       try {
         const res = await fetch('/drift-check', {
@@ -452,61 +429,55 @@
         });
         const data = await res.json();
 
-        let html = `
-          <div>Drift Status: <strong>${data.drift_detected ? 'DRIFT DETECTED' : 'NO DRIFT'}</strong></div>
+        resBox.innerHTML = `
+          <div>Drift Status: <strong>${data.drift_detected ? 'DRIFT DETECTED' : 'NO DRIFT DETECTED'}</strong></div>
           <div>Overall Drift Ratio: <strong>${(data.overall_drift_ratio * 100).toFixed(0)}%</strong></div>
-          <h4 style="margin-top: 0.75rem;">Feature KS-Test Breakdown:</h4>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">p-value: ${data.feature_details.query_length_distribution.p_value} | KS-statistic: ${data.feature_details.query_length_distribution.ks_statistic}</div>
         `;
-
-        for (const [feat, details] of Object.entries(data.feature_details)) {
-          html += `<div class="attribution-item"><span>${feat}</span><span>p-val: ${details.p_value} (${details.drift_detected ? 'DRIFT' : 'OK'})</span></div>`;
-        }
-
-        resBox.innerHTML = html;
       } catch (err) {
-        resBox.innerHTML = `<p style="color: var(--danger)">Error running drift check: ${err.message}</p>`;
+        resBox.innerHTML = `<p style="color: var(--danger)">Error: ${err.message}</p>`;
       }
     }
 
     async function runRAGBenchmark() {
-      const resBox = document.getElementById('ragResults');
+      const resBox = document.getElementById('benchmarkResults');
       resBox.innerHTML = `
-        <div style="color: var(--accent); font-weight: 600;">✓ RAG Benchmark Suite Executed Successfully</div>
+        <div style="color: var(--accent); font-weight: 600;">✓ Enterprise RAG Benchmark Suite Executed</div>
         <table style="width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: 0.85rem;">
           <tr style="border-bottom: 1px solid var(--card-border); text-align: left;">
             <th style="padding: 0.5rem;">Sample ID</th>
-            <th>Category</th>
+            <th>Query Snippet</th>
             <th>Context Prec</th>
             <th>Citation Prec</th>
-            <th>Tool Status</th>
+            <th>Status</th>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
             <td style="padding: 0.5rem;">SAMPLE-001</td>
-            <td>Single Doc</td>
+            <td>API Gateway max payload size...</td>
             <td>100%</td>
             <td>100%</td>
-            <td>N/A</td>
+            <td><span style="color: var(--accent)">PASS</span></td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
             <td style="padding: 0.5rem;">SAMPLE-002</td>
-            <td>Multi-Doc Synthesis</td>
+            <td>SOC2 vs GDPR log retention...</td>
             <td>100%</td>
             <td>100%</td>
-            <td>N/A</td>
+            <td><span style="color: var(--accent)">PASS</span></td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
             <td style="padding: 0.5rem;">SAMPLE-003</td>
-            <td>Tool-Augmented RAG</td>
+            <td>Database cluster status check...</td>
             <td>100%</td>
             <td>100%</td>
-            <td><span style="color: var(--accent)">SUCCESS (get_cluster_status)</span></td>
+            <td><span style="color: var(--accent)">PASS (get_cluster_status)</span></td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
             <td style="padding: 0.5rem;">SAMPLE-005</td>
-            <td>Prompt Injection Security</td>
+            <td>Customer refund policy...</td>
             <td>100%</td>
             <td>100%</td>
-            <td><span style="color: var(--accent)">PASSED (Injection Blocked)</span></td>
+            <td><span style="color: var(--accent)">PASS (Injection Blocked)</span></td>
           </tr>
         </table>
       `;

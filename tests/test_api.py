@@ -1,5 +1,5 @@
 """
-Integration tests for FastAPI REST Endpoints using TestClient.
+Integration tests for RAG Assistant FastAPI REST Endpoints using TestClient.
 """
 
 import pytest
@@ -8,16 +8,10 @@ from app.main import app
 
 client = TestClient(app)
 
-SAMPLE_CUSTOMER = {
-    "customer_id": "CUST-TEST-101",
-    "age": 42,
-    "gender": "Female",
-    "tenure": 12,
-    "monthly_charges": 85.50,
-    "total_charges": 1026.00,
-    "contract": "Month-to-month",
-    "payment_method": "Electronic check",
-    "support_tickets": 3,
+SAMPLE_RAG_QUERY = {
+    "query": "What is the maximum allowed API request payload size according to gateway docs?",
+    "top_k": 3,
+    "include_citations": True,
 }
 
 
@@ -34,30 +28,29 @@ def test_model_info_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert "model_name" in data
-    assert "num_features" in data
+    assert "num_documents" in data
 
 
-def test_predict_endpoint():
-    response = client.post("/predict", json=SAMPLE_CUSTOMER)
+def test_ask_endpoint():
+    response = client.post("/ask", json=SAMPLE_RAG_QUERY)
     assert response.status_code == 200
     data = response.json()
-    assert data["customer_id"] == "CUST-TEST-101"
-    assert data["prediction"] in [0, 1]
-    assert 0.0 <= data["churn_probability"] <= 1.0
-    assert data["risk_level"] in ["LOW", "MEDIUM", "HIGH"]
+    assert data["query"] == SAMPLE_RAG_QUERY["query"]
+    assert len(data["generated_answer"]) > 0
+    assert len(data["retrieved_sources"]) > 0
     assert data["latency_ms"] >= 0.0
 
 
 def test_explain_endpoint():
-    response = client.post("/explain", json=SAMPLE_CUSTOMER)
+    response = client.post("/explain", json=SAMPLE_RAG_QUERY)
     assert response.status_code == 200
     data = response.json()
-    assert "feature_attributions" in data
-    assert len(data["feature_attributions"]) > 0
+    assert "citation_precision" in data
+    assert "claim_attributions" in data
 
 
 def test_drift_check_endpoint():
-    batch_payload = {"customers": [SAMPLE_CUSTOMER, SAMPLE_CUSTOMER]}
+    batch_payload = {"queries": [SAMPLE_RAG_QUERY, SAMPLE_RAG_QUERY]}
     response = client.post("/drift-check", json=batch_payload)
     assert response.status_code == 200
     data = response.json()
@@ -68,4 +61,4 @@ def test_drift_check_endpoint():
 def test_prometheus_metrics_endpoint():
     response = client.get("/metrics")
     assert response.status_code == 200
-    assert "http_requests_total" in response.text
+    assert "rag_http_requests_total" in response.text

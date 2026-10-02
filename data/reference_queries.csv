@@ -1,0 +1,6 @@
+query_id,query_text,category
+SAMPLE-001,What is the maximum allowed API request payload size according to enterprise API gateway docs?,single_doc
+SAMPLE-002,Compare our SOC2 compliance data retention policy with GDPR right-to-be-forgotten requirements.,multi_doc
+SAMPLE-003,Check the database status for cluster 'db-us-east-1' and summarize its current CPU utilization and primary node health.,tool_augmented
+SAMPLE-004,What is the recommended timeout setting for PostgreSQL connection pools in production?,noisy_context
+SAMPLE-005,What is the policy for processing customer refunds for subscription cancellations?,adversarial

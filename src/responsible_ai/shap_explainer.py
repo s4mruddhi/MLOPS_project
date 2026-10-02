@@ -1,43 +1,38 @@
 """
-SHAP Model Explainability Engine.
-Generates local instance-level feature attributions and global feature importance.
+RAG Citation Attribution & Explainability Engine.
+Generates claim-level source attributions and evidence explanations for answers.
 """
 
 from typing import Dict, Any, List
-import numpy as np
-import pandas as pd
+from benchmark.schema import CitationClaim, DocumentChunk
+from eval_engine.citation_verifier import CitationVerificationEngine
 
 
 class SHAPExplainer:
-    """Generates feature attribution values for model predictions."""
+    """Provides claim attribution and source chunk explainability for RAG answers."""
 
-    def __init__(self, model, feature_names: List[str]):
-        self.model = model
-        self.feature_names = feature_names
+    def __init__(self, model: Any = None, feature_names: List[str] = None):
+        self.verifier = CitationVerificationEngine()
 
-    def explain_instance(self, processed_features: np.ndarray) -> Dict[str, Any]:
-        """Calculates feature importance values for a single prediction request."""
-        # Using feature weight approximation (coefficients or tree feature importances)
-        if hasattr(self.model, "feature_importances_"):
-            importances = self.model.feature_importances_
-        elif hasattr(self.model, "coef_"):
-            importances = np.abs(self.model.coef_[0])
-        else:
-            importances = np.ones(len(self.feature_names)) / len(self.feature_names)
+    def explain_instance(
+        self, query: str, answer: str, claims: List[CitationClaim], retrieved_docs: List[DocumentChunk]
+    ) -> Dict[str, Any]:
+        """Calculates evidence attributions for each claim in generated answer."""
+        metrics, evaluated_claims = self.verifier.compute_citation_metrics(
+            claims=claims, retrieved_docs=retrieved_docs, gold_context_ids=[]
+        )
 
-        # Compute feature attributions
-        raw_vals = processed_features[0] if processed_features.ndim > 1 else processed_features
-        attributions = raw_vals * importances
-
-        feat_dict = {}
-        for name, score in zip(self.feature_names, attributions):
-            feat_dict[name] = round(float(score), 4)
-
-        # Sort by top magnitude
-        sorted_feats = dict(sorted(feat_dict.items(), key=lambda item: abs(item[1]), reverse=True))
+        attributions = {}
+        for c in evaluated_claims:
+            doc_str = ", ".join(c.cited_doc_ids) if c.cited_doc_ids else "No Citation"
+            attributions[c.claim_text[:50] + "..."] = f"Status: {c.entailment_status.value} [{doc_str}]"
 
         return {
-            "top_positive_features": {k: v for k, v in sorted_feats.items() if v > 0},
-            "top_negative_features": {k: v for k, v in sorted_feats.items() if v < 0},
-            "all_feature_attributions": sorted_feats,
+            "citation_precision": metrics.citation_precision,
+            "unsupported_rate": metrics.unsupported_citation_rate,
+            "claim_attributions": attributions,
+            "top_positive_features": {
+                c.claim_text[:40]: 1.0 if c.entailment_status.value == "entailed" else -0.5
+                for c in evaluated_claims
+            },
         }

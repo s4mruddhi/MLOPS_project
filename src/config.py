@@ -1,5 +1,5 @@
 """
-Centralized Configuration & Reproducibility Settings for MLOps Pipeline.
+Centralized Configuration & Reproducibility Settings for Enterprise RAG Ops Pipeline.
 """
 
 import os
@@ -11,7 +11,7 @@ SEED = 42
 
 
 def set_seed(seed: int = SEED) -> None:
-    """Enforces global random seed across standard library, numpy, and ML libraries."""
+    """Enforces global random seed across Python, NumPy, and ML libraries."""
     os.environ["PYTHONHASHSEED"] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -20,20 +20,20 @@ def set_seed(seed: int = SEED) -> None:
 # Directory Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
-RAW_DATA_PATH = os.path.join(DATA_DIR, "raw", "customer_churn.csv")
-PROCESSED_DATA_PATH = os.path.join(DATA_DIR, "processed", "churn_processed.csv")
-REFERENCE_DATA_PATH = os.path.join(DATA_DIR, "reference_baseline.csv")
+RAW_DOCS_PATH = os.path.join(DATA_DIR, "raw", "knowledge_docs.json")
+PROCESSED_CHUNKS_PATH = os.path.join(DATA_DIR, "processed", "rag_chunks.csv")
+REFERENCE_QUERIES_PATH = os.path.join(DATA_DIR, "reference_queries.csv")
 MODEL_ARTIFACT_DIR = os.path.join(BASE_DIR, "models")
 
 # MLflow Settings
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///" + os.path.join(BASE_DIR, "mlflow.db").replace("\\", "/"))
-EXPERIMENT_NAME = "Enterprise_Customer_Churn_Prediction"
-MODEL_REGISTRY_NAME = "CustomerChurnPredictor"
+EXPERIMENT_NAME = "Enterprise_Knowledge_Assistant_RAG_Ops"
+MODEL_REGISTRY_NAME = "EnterpriseRAGAssistant"
 
-# Quality Gate Thresholds
-MIN_ACCURACY_THRESHOLD = 0.75
-MIN_F1_THRESHOLD = 0.75
-MIN_ROC_AUC_THRESHOLD = 0.82
+# RAG Quality Gate Thresholds
+MIN_CONTEXT_PRECISION = 0.75
+MIN_CITATION_PRECISION = 0.80
+MIN_FAITHFULNESS_SCORE = 0.80
 MAX_P95_LATENCY_MS = 150.0
 
 # Ensure directories exist
