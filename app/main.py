@@ -32,6 +32,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
+from fastapi.responses import HTMLResponse
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,6 +41,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", response_class=HTMLResponse, tags=["Dashboard UI"])
+def get_dashboard_ui():
+    """Serves the Interactive Enterprise MLOps & RAG Dashboard UI."""
+    html_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(html_path):
+        with open(html_path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>Enterprise MLOps REST Service Running</h1>"
 
 # Prometheus Metrics Collectors
 REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"])

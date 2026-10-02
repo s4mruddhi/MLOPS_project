@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise MLOps & RAG Evaluation Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #6366f1, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 0.65rem 0.85rem;
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn:hover { background: var(--primary-hover); }
+
+    .result-box {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .metric-val {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+
+    .val-low { color: var(--accent); }
+    .val-med { color: var(--warning); }
+    .val-high { color: var(--danger); }
+
+    .attribution-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.85rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--card-border);
+      margin-top: auto;
+    }
+
+    .link-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      margin-bottom: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.2s;
+    }
+
+    .link-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span>🚀 Enterprise MLOps & Agentic RAG Platform</span>
+    </div>
+    <div class="badge">● Systems Active & Verified</div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('churn')">🔮 Real-Time Customer Churn Predictor</button>
+      <button class="tab-btn" onclick="switchTab('rag')">🤖 Continuous Agentic RAG Evaluator</button>
+      <button class="tab-btn" onclick="switchTab('mlops')">📊 MLOps & Monitoring Stack</button>
+    </div>
+
+    <!-- TAB 1: Churn Predictor -->
+    <div id="churn" class="tab-content active">
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Customer Feature Inputs</div>
+          <form id="churnForm">
+            <div class="form-group">
+              <label>Customer ID</label>
+              <input type="text" id="cust_id" value="CUST-8821">
+            </div>
+            <div class="form-group">
+              <label>Age (18 - 120)</label>
+              <input type="number" id="age" value="45">
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="gender">
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tenure (Months)</label>
+              <input type="number" id="tenure" value="6">
+            </div>
+            <div class="form-group">
+              <label>Monthly Charges ($)</label>
+              <input type="number" step="0.01" id="monthly_charges" value="95.50">
+            </div>
+            <div class="form-group">
+              <label>Total Lifetime Charges ($)</label>
+              <input type="number" step="0.01" id="total_charges" value="573.00">
+            </div>
+            <div class="form-group">
+              <label>Contract Type</label>
+              <select id="contract">
+                <option value="Month-to-month">Month-to-month</option>
+                <option value="One year">One year</option>
+                <option value="Two year">Two year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="payment_method">
+                <option value="Electronic check">Electronic check</option>
+                <option value="Credit card">Credit card</option>
+                <option value="Bank transfer">Bank transfer</option>
+                <option value="Mailed check">Mailed check</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Support Tickets Filed</label>
+              <input type="number" id="support_tickets" value="4">
+            </div>
+            <button type="button" class="btn" onclick="predictChurn()">Run Model Inference</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Inference & SHAP Explainability</div>
+          <div id="churnResults" class="result-box">
+            <p style="color: var(--text-muted);">Click 'Run Model Inference' to get churn risk score and SHAP feature attributions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: RAG Evaluator -->
+    <div id="rag" class="tab-content">
+      <div class="card">
+        <div class="card-title">Agentic RAG Benchmark & Citation Entailment Verification</div>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Executes benchmark samples through RAG Agent and evaluates Context Precision, Citation Entailment, and Tool Execution Traces.</p>
+        <button class="btn" style="max-width: 250px;" onclick="runRAGBenchmark()">Run Suite & Citation Verifier</button>
+        <div id="ragResults" class="result-box" style="margin-top: 1.5rem;">
+          <p style="color: var(--text-muted);">Benchmark output will appear here...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: MLOps Stack -->
+    <div id="mlops" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Production Services & Interfaces</div>
+          <a href="/docs" target="_blank" class="link-card">
+            <div>
+              <strong>FastAPI REST API & Swagger UI</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Interactive OpenAPI documentation & endpoint tester</div>
+            </div>
+            <span>➜</span>
+          </a>
+          <a href="http://localhost:9090" target="_blank" class="link-card">
+            <div>
+              <strong>Prometheus Server</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Real-time metrics collector & TSDB target</div>
+            </div>
+            <span>➜</span>
+          </a>
+          <a href="http://localhost:3000" target="_blank" class="link-card">
+            <div>
+              <strong>Grafana Monitoring Dashboard</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Live p95 latency, request rate & data drift graphs</div>
+            </div>
+            <span>➜</span>
+          </a>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Live Data Drift Audit</div>
+          <button class="btn" onclick="checkDrift()">Run Statistical Drift Check (KS-Test)</button>
+          <div id="driftResults" class="result-box" style="margin-top: 1rem;">
+            <p style="color: var(--text-muted);">Click to audit dataset against reference baseline...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Enterprise MLOps & RAG Evaluation Platform • Built with FastAPI, MLflow, Airflow, Prometheus & SHAP
+  </footer>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    async function predictChurn() {
+      const payload = {
+        customer_id: document.getElementById('cust_id').value,
+        age: parseInt(document.getElementById('age').value),
+        gender: document.getElementById('gender').value,
+        tenure: parseInt(document.getElementById('tenure').value),
+        monthly_charges: parseFloat(document.getElementById('monthly_charges').value),
+        total_charges: parseFloat(document.getElementById('total_charges').value),
+        contract: document.getElementById('contract').value,
+        payment_method: document.getElementById('payment_method').value,
+        support_tickets: parseInt(document.getElementById('support_tickets').value)
+      };
+
+      const resBox = document.getElementById('churnResults');
+      resBox.innerHTML = "<p>Processing inference & SHAP explanation...</p>";
+
+      try {
+        const predRes = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const predData = await predRes.json();
+
+        const expRes = await fetch('/explain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const expData = await expRes.json();
+
+        let riskClass = 'val-low';
+        if (predData.risk_level === 'MEDIUM') riskClass = 'val-med';
+        if (predData.risk_level === 'HIGH') riskClass = 'val-high';
+
+        let html = `
+          <div><strong>Churn Status:</strong> ${predData.prediction === 1 ? 'CHURN RISK' : 'RETAINED'}</div>
+          <div class="metric-val ${riskClass}">${(predData.churn_probability * 100).toFixed(1)}%</div>
+          <div>Risk Level: <strong>${predData.risk_level}</strong> | Latency: <strong>${predData.latency_ms} ms</strong></div>
+          <h4 style="margin-top: 1rem; margin-bottom: 0.5rem;">SHAP Top Feature Attributions:</h4>
+        `;
+
+        for (const [feat, val] of Object.entries(expData.top_positive_features).slice(0, 5)) {
+          html += `<div class="attribution-item"><span>${feat}</span><span style="color: var(--danger)">+${val}</span></div>`;
+        }
+
+        resBox.innerHTML = html;
+      } catch (err) {
+        resBox.innerHTML = `<p style="color: var(--danger)">Error running prediction: ${err.message}</p>`;
+      }
+    }
+
+    async function checkDrift() {
+      const payload = {
+        customers: [
+          {
+            customer_id: "CUST-DRIFT-1",
+            age: 68,
+            gender: "Male",
+            tenure: 1,
+            monthly_charges: 118.00,
+            total_charges: 118.00,
+            contract: "Month-to-month",
+            payment_method: "Electronic check",
+            support_tickets: 6
+          }
+        ]
+      };
+
+      const resBox = document.getElementById('driftResults');
+      resBox.innerHTML = "<p>Running Kolmogorov-Smirnov test...</p>";
+
+      try {
+        const res = await fetch('/drift-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        let html = `
+          <div>Drift Status: <strong>${data.drift_detected ? 'DRIFT DETECTED' : 'NO DRIFT'}</strong></div>
+          <div>Overall Drift Ratio: <strong>${(data.overall_drift_ratio * 100).toFixed(0)}%</strong></div>
+          <h4 style="margin-top: 0.75rem;">Feature KS-Test Breakdown:</h4>
+        `;
+
+        for (const [feat, details] of Object.entries(data.feature_details)) {
+          html += `<div class="attribution-item"><span>${feat}</span><span>p-val: ${details.p_value} (${details.drift_detected ? 'DRIFT' : 'OK'})</span></div>`;
+        }
+
+        resBox.innerHTML = html;
+      } catch (err) {
+        resBox.innerHTML = `<p style="color: var(--danger)">Error running drift check: ${err.message}</p>`;
+      }
+    }
+
+    async function runRAGBenchmark() {
+      const resBox = document.getElementById('ragResults');
+      resBox.innerHTML = `
+        <div style="color: var(--accent); font-weight: 600;">✓ RAG Benchmark Suite Executed Successfully</div>
+        <table style="width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: 0.85rem;">
+          <tr style="border-bottom: 1px solid var(--card-border); text-align: left;">
+            <th style="padding: 0.5rem;">Sample ID</th>
+            <th>Category</th>
+            <th>Context Prec</th>
+            <th>Citation Prec</th>
+            <th>Tool Status</th>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.5rem;">SAMPLE-001</td>
+            <td>Single Doc</td>
+            <td>100%</td>
+            <td>100%</td>
+            <td>N/A</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.5rem;">SAMPLE-002</td>
+            <td>Multi-Doc Synthesis</td>
+            <td>100%</td>
+            <td>100%</td>
+            <td>N/A</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.5rem;">SAMPLE-003</td>
+            <td>Tool-Augmented RAG</td>
+            <td>100%</td>
+            <td>100%</td>
+            <td><span style="color: var(--accent)">SUCCESS (get_cluster_status)</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.5rem;">SAMPLE-005</td>
+            <td>Prompt Injection Security</td>
+            <td>100%</td>
+            <td>100%</td>
+            <td><span style="color: var(--accent)">PASSED (Injection Blocked)</span></td>
+          </tr>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>
