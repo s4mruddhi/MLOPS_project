@@ -1,0 +1,44 @@
+name: Enterprise MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test_and_evaluate:
+    name: Build, Test & Quality Gate Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Data Ingestion & Preprocessing
+        run: |
+          python src/data/ingestion.py
+          python -c "import pandas as pd; from src.data.preprocessing import preprocess_data; df=pd.read_csv('data/raw/customer_churn.csv'); preprocess_data(df, fit=True)"
+
+      - name: Train Models & Check Quality Gate
+        run: |
+          python src/models/train.py
+
+      - name: Run Unit & Integration Test Suite
+        run: |
+          pytest tests/ -v --junitxml=test-results.xml
+
+      - name: Test Docker Container Build
+        run: |
+          docker build -t mlops-churn-api:test .

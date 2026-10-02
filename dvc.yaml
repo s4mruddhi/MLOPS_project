@@ -1,0 +1,32 @@
+stages:
+  ingest:
+    cmd: python src/data/ingestion.py
+    deps:
+      - src/data/ingestion.py
+    params:
+      - ingestion.raw_data_path
+    outs:
+      - data/raw/customer_churn.csv
+
+  preprocess:
+    cmd: python -c "import pandas as pd; from src.data.preprocessing import preprocess_data; df=pd.read_csv('data/raw/customer_churn.csv'); preprocess_data(df, fit=True)"
+    deps:
+      - data/raw/customer_churn.csv
+      - src/data/preprocessing.py
+    params:
+      - preprocessing.test_size
+    outs:
+      - data/processed/churn_processed.csv
+
+  train:
+    cmd: python src/models/train.py
+    deps:
+      - data/processed/churn_processed.csv
+      - src/models/train.py
+      - src/models/evaluate.py
+    params:
+      - train.quality_gate.min_accuracy
+      - train.quality_gate.min_f1
+    outs:
+      - models/best_model.pkl
+      - models/preprocessor.pkl

@@ -1,0 +1,36 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Total HTTP Requests",
+      "type": "stat",
+      "targets": [{ "expr": "sum(http_requests_total)", "refId": "A" }],
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "title": "Inference Latency p95 (seconds)",
+      "type": "gauge",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(model_inference_latency_seconds_bucket[5m])) by (le))", "refId": "A" }],
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 }
+    },
+    {
+      "title": "Data Drift Ratio",
+      "type": "stat",
+      "targets": [{ "expr": "model_data_drift_ratio", "refId": "A" }],
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["mlops", "prometheus", "fastapi"],
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "Enterprise MLOps Model Health & Drift Dashboard",
+  "version": 1
+}
