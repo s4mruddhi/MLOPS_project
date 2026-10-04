@@ -60,7 +60,7 @@ pipeline {
 
         stage('Run Pytest Integration Suite') {
             steps {
-                sh 'python3 -m pytest tests/ -v'
+                sh 'PYTHONPATH=. python3 -m pytest tests/ -v'
             }
         }
 
