@@ -13,7 +13,12 @@ pipeline {
             steps {
                 echo 'Checking out RAGOps Pipeline Repository...'
 
-                checkout scm
+                try {
+                    checkout scm
+                } catch (Exception e) {
+                    echo 'Checkout SCM fallback: Cloning from Git URL...'
+                    git branch: 'main', url: 'https://github.com/samrudhideshmukh12413724/MLOPS_project.git'
+                }
 
                 sh 'pwd'
                 sh 'ls -la'
