@@ -13,6 +13,7 @@ pipeline {
             steps {
                 echo 'Checking out RAGOps Pipeline Repository...'
 
+                sh 'rm -rf .git/*.lock .git/config.lock || true'
                 git branch: 'main', url: 'https://github.com/samrudhideshmukh12413724/MLOPS_project.git'
 
                 sh 'pwd'
