@@ -1,0 +1,63 @@
+{
+  "reference_sample_size": 20,
+  "in_domain_evaluation": {
+    "drift_detected": false,
+    "drifted_features_count": 2,
+    "total_features": 4,
+    "overall_drift_ratio": 0.5,
+    "semantic_drift_score": 0.0251,
+    "feature_details": {
+      "word_count_distribution": {
+        "p_value": 0.0,
+        "ks_statistic": 0.75,
+        "wasserstein_distance": 2.05,
+        "drift_detected": true
+      },
+      "char_count_distribution": {
+        "p_value": 0.0,
+        "ks_statistic": 0.9,
+        "wasserstein_distance": 17.55,
+        "drift_detected": true
+      },
+      "vocabulary_drift": {
+        "jaccard_similarity": 0.5657,
+        "jaccard_distance": 0.4343,
+        "drift_detected": false
+      },
+      "semantic_embedding_drift": {
+        "cosine_distance": 0.0251,
+        "drift_detected": false
+      }
+    }
+  },
+  "out_of_domain_evaluation": {
+    "drift_detected": true,
+    "drifted_features_count": 2,
+    "total_features": 4,
+    "overall_drift_ratio": 0.5,
+    "semantic_drift_score": 0.8271,
+    "feature_details": {
+      "word_count_distribution": {
+        "p_value": 0.3686,
+        "ks_statistic": 0.35,
+        "wasserstein_distance": 1.6,
+        "drift_detected": false
+      },
+      "char_count_distribution": {
+        "p_value": 0.9491,
+        "ks_statistic": 0.2,
+        "wasserstein_distance": 2.8,
+        "drift_detected": false
+      },
+      "vocabulary_drift": {
+        "jaccard_similarity": 0.0635,
+        "jaccard_distance": 0.9365,
+        "drift_detected": true
+      },
+      "semantic_embedding_drift": {
+        "cosine_distance": 0.8271,
+        "drift_detected": true
+      }
+    }
+  }
+}

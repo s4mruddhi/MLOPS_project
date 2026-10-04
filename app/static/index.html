@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Production-Ready Multilingual Enterprise Knowledge Assistant (RAGOps)</title>
+  <title>Enterprise Knowledge Assistant (RAGOps)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #0b0f19;
-      --panel-bg: rgba(17, 24, 39, 0.85);
-      --card-bg: rgba(30, 41, 59, 0.7);
+      --panel-bg: rgba(17, 24, 39, 0.90);
+      --card-bg: rgba(30, 41, 59, 0.75);
       --border-color: rgba(255, 255, 255, 0.12);
       --primary: #6366f1;
       --primary-hover: #4f46e5;
@@ -35,7 +35,7 @@
       background: rgba(15, 23, 42, 0.95);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-color);
-      padding: 1rem 2.5rem;
+      padding: 1.2rem 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -51,20 +51,20 @@
     }
 
     .brand-icon {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       background: linear-gradient(135deg, #6366f1, #10b981);
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 1.2rem;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      font-size: 1.4rem;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
     }
 
     .brand-title {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       background: linear-gradient(135deg, #a5b4fc, #6366f1, #10b981);
@@ -84,9 +84,9 @@
       gap: 0.5rem;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
-      padding: 0.4rem 0.85rem;
+      padding: 0.45rem 0.95rem;
       border-radius: 9999px;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 500;
     }
 
@@ -97,65 +97,18 @@
       width: 100%;
       max-width: 1720px;
       margin: 0 auto;
-      padding: 1.5rem 2.5rem;
+      padding: 2rem 2.5rem;
       flex: 1;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
     }
 
-    /* Pathway Bar Links */
-    .pathway-bar {
-      display: flex;
-      gap: 0.75rem;
-      background: rgba(15, 23, 42, 0.7);
-      padding: 0.5rem;
-      border-radius: 0.75rem;
-      border: 1px solid var(--border-color);
-      flex-wrap: wrap;
-    }
-
-    .pathway-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 600;
-      padding: 0.65rem 1.25rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
-    }
-
-    .pathway-btn.active, .pathway-btn:hover {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
-    }
-
-    .pathway-btn.external {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .pathway-btn.external:hover {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: none;
-    }
-
-    /* Tab Layouts */
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
     /* Main Grid */
     .main-grid {
       display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 1.75rem;
+      grid-template-columns: 440px 1fr;
+      gap: 2rem;
     }
 
     @media (max-width: 1100px) {
@@ -167,30 +120,30 @@
       backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
       border-radius: 1.25rem;
-      padding: 1.75rem;
+      padding: 2rem;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     }
 
     .panel-title {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       color: #fff;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.75rem;
+      padding-bottom: 0.85rem;
     }
 
-    .form-group { margin-bottom: 1.2rem; }
+    .form-group { margin-bottom: 1.4rem; }
 
     label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 600;
       color: var(--text-muted);
-      margin-bottom: 0.45rem;
+      margin-bottom: 0.5rem;
     }
 
     input, textarea, select {
@@ -198,9 +151,9 @@
       background: rgba(15, 23, 42, 0.85);
       border: 1px solid var(--border-color);
       color: #fff;
-      padding: 0.8rem 1rem;
-      border-radius: 0.6rem;
-      font-size: 0.92rem;
+      padding: 0.85rem 1.1rem;
+      border-radius: 0.65rem;
+      font-size: 0.95rem;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -212,17 +165,17 @@
     .sample-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.5rem;
+      gap: 0.45rem;
+      margin-top: 0.6rem;
     }
 
     .sample-chip {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
       color: #cbd5e1;
-      padding: 0.35rem 0.65rem;
-      border-radius: 0.4rem;
-      font-size: 0.78rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.45rem;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -238,10 +191,10 @@
       background: linear-gradient(135deg, var(--primary), #4338ca);
       color: #fff;
       border: none;
-      padding: 0.9rem;
-      border-radius: 0.6rem;
+      padding: 1rem;
+      border-radius: 0.65rem;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
@@ -252,288 +205,158 @@
     }
 
     .btn-submit:hover {
-      background: linear-gradient(135deg, #4f46e5, #3730a3);
+      background: linear-gradient(135deg, var(--primary-hover), #3730a3);
       transform: translateY(-1px);
     }
 
-    /* Response Cards */
+    /* Output Card */
     .response-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 1rem;
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .answer-text {
-      font-size: 1.05rem;
-      line-height: 1.6;
-      color: #f1f5f9;
-      margin-bottom: 1.25rem;
-      background: rgba(15, 23, 42, 0.5);
-      padding: 1.2rem;
-      border-radius: 0.75rem;
-      border-left: 4px solid var(--primary);
+      padding: 1.75rem;
+      margin-top: 1rem;
     }
 
     .meta-row {
       display: flex;
-      gap: 1.5rem;
+      gap: 1.25rem;
       flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-
-    .meta-item {
-      font-size: 0.82rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
-    .meta-item strong { color: #fff; }
+
+    .meta-item { display: flex; align-items: center; gap: 0.4rem; }
+
+    .answer-text {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #f1f5f9;
+      margin-bottom: 1.5rem;
+      white-space: pre-wrap;
+    }
+
+    .source-box {
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 3px solid var(--primary);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 0.85rem;
+      font-size: 0.88rem;
+    }
+
+    .source-box .title { font-weight: 700; color: #fff; margin-bottom: 0.35rem; }
 
     .claim-pill {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
       padding: 0.35rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.78rem;
+      border-radius: 0.4rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      margin-right: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .claim-verified { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .claim-contradicted { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    .source-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 0.6rem;
-      padding: 0.85rem;
-      margin-bottom: 0.65rem;
-      font-size: 0.85rem;
-    }
-    .source-box .title { font-weight: 700; color: #a5b4fc; margin-bottom: 0.25rem; }
-
-    /* Service Cards Grid */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
+      margin: 0.25rem 0;
     }
 
-    .service-card {
-      background: var(--panel-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .service-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
-    .service-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
-
-    .service-link {
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      padding: 0.6rem 1rem;
-      border-radius: 0.5rem;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .service-link:hover { background: var(--primary); color: #fff; }
-
-    /* Loading Spinner */
     .spinner {
-      width: 20px;
-      height: 20px;
       border: 3px solid rgba(255,255,255,0.3);
       border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 0.8s ease-in-out infinite;
+      border-top: 3px solid #fff;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Top Header -->
   <header>
     <div class="brand">
       <div class="brand-icon">🤖</div>
       <div>
         <div class="brand-title">Enterprise Knowledge Assistant</div>
-        <div style="font-size:0.75rem; color: var(--text-muted);">Production-Ready Multilingual RAGOps Infrastructure</div>
+        <div style="font-size:0.78rem; color: var(--text-muted);">Production RAGOps Support Infrastructure</div>
       </div>
     </div>
     <div class="header-stats">
       <div class="stat-badge"><div class="stat-dot"></div> RAG Model: EnterpriseRAGAssistant</div>
-      <div class="stat-badge" style="border-color: rgba(16, 185, 129, 0.4); color: #34d399;">Alias: Production</div>
-      <div class="stat-badge">Docs: 1,450 Chunks</div>
+      <div class="stat-badge" style="border-color: rgba(99, 102, 241, 0.4);">Alias: Production</div>
+      <div class="stat-badge">Docs: 27 | Chunks: 78</div>
     </div>
   </header>
 
+  <!-- App Main Container -->
   <div class="app-container">
 
-    <!-- Direct Pathway Navigation Links -->
-    <div class="pathway-bar">
-      <button class="pathway-btn active" onclick="switchTab('assistant')">🤖 Knowledge Assistant (Multilingual)</button>
-      <button class="pathway-btn" onclick="switchTab('drift')">📊 Data & Query Drift Monitoring</button>
-      <button class="pathway-btn" onclick="switchTab('shap')">🧠 Claim Citation Attribution (SHAP)</button>
-      <button class="pathway-btn" onclick="switchTab('pathways')">🛣️ Infrastructure Pathways</button>
-      <a href="http://localhost:8080/dags/ragops_enterprise_pipeline" target="_blank" class="pathway-btn external">🔄 Airflow DAGs (Port 8080) ↗</a>
-      <a href="http://127.0.0.1:5000" target="_blank" class="pathway-btn external">🧪 MLflow UI (Port 5000) ↗</a>
-      <a href="/docs" target="_blank" class="pathway-btn external">⚡ REST API Docs ↗</a>
-    </div>
+    <div class="main-grid">
+      
+      <!-- Left Input Panel -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>Query Knowledge Base</span>
+          <span style="font-size:0.8rem; font-weight: normal; color: var(--accent);">Active</span>
+        </div>
 
-    <!-- TAB 1: Multilingual Knowledge Assistant -->
-    <div id="tab-assistant" class="tab-content active">
-      <div class="main-grid">
-        
-        <!-- Left Query Console -->
+        <div class="form-group">
+          <label>Query Language</label>
+          <select id="queryLang" onchange="updateSampleChips()">
+            <option value="en" selected>English 🇺🇸</option>
+            <option value="es">Spanish (Español) 🇪🇸</option>
+            <option value="fr">French (Français) 🇫🇷</option>
+            <option value="de">German (Deutsch) 🇩🇪</option>
+            <option value="hi">Hindi (हिंदी) 🇮🇳</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Enterprise Question</label>
+          <textarea id="queryInput" rows="4" placeholder="Type your query in any language..."></textarea>
+          <div class="sample-chips" id="sampleChips">
+            <!-- Dynamically rendered based on language -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Retrieval Top-K Chunks</label>
+          <select id="topK">
+            <option value="3" selected>Top 3 Relevant Documents</option>
+            <option value="5">Top 5 Relevant Documents</option>
+            <option value="10">Top 10 (Deep Search)</option>
+          </select>
+        </div>
+
+        <button class="btn-submit" id="btnSubmit" onclick="sendRAGQuery()">
+          <span>Execute RAG Search</span>
+        </button>
+      </div>
+
+      <!-- Right Output Workspace -->
+      <div>
         <div class="panel">
           <div class="panel-title">
-            <span>Query Knowledge Base</span>
-            <span style="font-size:0.8rem; font-weight: normal; color: var(--accent);">Active</span>
+            <span>Knowledge Assistant Answer & Citations</span>
+            <div id="latencyBadge" style="display:none;" class="stat-badge">Latency: <span id="latencyValue">0ms</span></div>
           </div>
 
-          <div class="form-group">
-            <label>Query Language</label>
-            <select id="queryLang" onchange="updateSampleChips()">
-              <option value="en" selected>English 🇺🇸</option>
-              <option value="es">Spanish (Español) 🇪🇸</option>
-              <option value="fr">French (Français) 🇫🇷</option>
-              <option value="de">German (Deutsch) 🇩🇪</option>
-              <option value="hi">Hindi (हिंदी) 🇮🇳</option>
-              <option value="ja">Japanese (日本語) 🇯🇵</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Enterprise Question</label>
-            <textarea id="queryInput" rows="4" placeholder="Type your query in any language..."></textarea>
-            <div class="sample-chips" id="sampleChips">
-              <!-- Dynamically rendered based on language -->
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Retrieval Top-K Chunks</label>
-            <select id="topK">
-              <option value="3" selected>Top 3 Relevant Documents</option>
-              <option value="5">Top 5 Relevant Documents</option>
-              <option value="10">Top 10 (Deep Search)</option>
-            </select>
-          </div>
-
-          <button class="btn-submit" id="btnSubmit" onclick="sendRAGQuery()">
-            <span>Execute RAG Search</span>
-          </button>
-        </div>
-
-        <!-- Right Output Workspace -->
-        <div>
-          <div class="panel">
-            <div class="panel-title">
-              <span>Knowledge Assistant Answer & Citations</span>
-              <div id="latencyBadge" style="display:none;" class="stat-badge">Latency: <span id="latencyValue">0ms</span></div>
-            </div>
-
-            <div id="outputArea">
-              <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                <h3>Ask a Question to Search Verified Enterprise Knowledge</h3>
-                <p style="font-size:0.88rem; margin-top: 0.5rem;">Select a language and prompt on the left to test real-time retrieval & NLI claim verification.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TAB 2: Data Drift Monitoring -->
-    <div id="tab-drift" class="tab-content">
-      <div class="panel">
-        <div class="panel-title">
-          <span>Continuous Query Distribution Drift Detection (KS-Test)</span>
-          <button class="pathway-btn" style="background:var(--primary); color:#fff;" onclick="runDriftCheck()">Run Drift Audit</button>
-        </div>
-        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 1.5rem;">
-          Monitors incoming user query length, vocabulary entropy, and embedding distribution against baseline reference dataset using Kolmogorov-Smirnov statistical tests.
-        </p>
-        <div id="driftResults">
-          <div class="response-card">
-            <h4>Baseline Dataset Status</h4>
-            <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.4rem;">Reference Queries: 100 samples | Feature Entropy Baseline: 3.42 | Status: Healthy</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: Claim Attribution (SHAP) -->
-    <div id="tab-shap" class="tab-content">
-      <div class="panel">
-        <div class="panel-title">
-          <span>SHAP Attribution & NLI Claim Entailment Verification</span>
-        </div>
-        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom: 1.5rem;">
-          Decomposes generated answers into individual claims and cross-references source document chunks using Natural Language Inference (NLI).
-        </p>
-        <div id="shapResults">
-          <div class="response-card">
-            <h4>Claim Attribution Breakdown</h4>
-            <div style="margin-top:0.75rem;">
-              <div class="claim-pill claim-verified">✓ DOC-GATEWAY-101: 94% Attribution (Payload Limit 10MB)</div>
-              <div class="claim-pill claim-verified">✓ DOC-SEC-201: 91% Attribution (Token Validity 1 Hour)</div>
+          <div id="outputArea">
+            <div style="text-align: center; padding: 5rem 1rem; color: var(--text-muted);">
+              <div style="font-size: 3.5rem; margin-bottom: 1rem;">🔍</div>
+              <h3 style="color:#fff; font-size:1.3rem;">Ask a Question to Search Verified Enterprise Knowledge</h3>
+              <p style="font-size:0.9rem; margin-top: 0.6rem;">Select a question on the left or type your prompt to execute real-time RAG retrieval & NLI claim verification.</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- TAB 4: Infrastructure Pathways -->
-    <div id="tab-pathways" class="tab-content">
-      <div class="services-grid">
-        
-        <div class="service-card">
-          <div>
-            <div class="service-title">🔄 Apache Airflow Orchestration</div>
-            <p class="service-desc">Runs the 8-stage automated workflow: Data ingestion $\rightarrow$ Validation $\rightarrow$ Vector Chunking $\rightarrow$ Embedding $\rightarrow$ Model Registry.</p>
-          </div>
-          <a href="http://localhost:8080/dags/ragops_enterprise_pipeline" target="_blank" class="service-link">Open Airflow DAGs (Port 8080) ↗</a>
-        </div>
-
-        <div class="service-card">
-          <div>
-            <div class="service-title">🧪 MLflow Experiment Tracking</div>
-            <p class="service-desc">Tracks candidate models (Sparse TF-IDF, Dense Vector, Reranked Agentic RAG) and registers production artifacts.</p>
-          </div>
-          <a href="http://127.0.0.1:5000" target="_blank" class="service-link">Open MLflow UI (Port 5000) ↗</a>
-        </div>
-
-        <div class="service-card">
-          <div>
-            <div class="service-title">⚡ FastAPI REST Documentation</div>
-            <p class="service-desc">OpenAPI Interactive Swagger UI for live REST API testing (`/ask`, `/explain`, `/drift-check`).</p>
-          </div>
-          <a href="/docs" target="_blank" class="service-link">Open Swagger Docs ↗</a>
-        </div>
-
-        <div class="service-card">
-          <div>
-            <div class="service-title">📈 Prometheus Metrics</div>
-            <p class="service-desc">Scrapes live query latency histograms, request throughput counters, and drift ratios.</p>
-          </div>
-          <a href="/metrics" target="_blank" class="service-link">View Prometheus Endpoint ↗</a>
-        </div>
-
-      </div>
     </div>
 
   </div>
@@ -541,34 +364,27 @@
   <script>
     const sampleQueries = {
       en: [
-        "What is the maximum allowed API request payload size?",
-        "How long are OAuth authentication tokens valid for?",
-        "What are the data retention guidelines for audit logs?"
+        "What health insurance benefits are available to employees?",
+        "What is the annual leave entitlement for employees?",
+        "How does travel reimbursement work for international travel?",
+        "What is the maximum allowed API request payload size?"
       ],
       es: [
-        "¿Cuál es el tamaño máximo de carga útil para API Gateway?",
-        "¿Cuánto tiempo son válidos los tokens de autenticación?",
-        "¿Cuáles son las pautas de retención de datos de auditoría?"
+        "¿Cuáles son los beneficios de seguro médico disponibles?",
+        "¿Cuál es el derecho a vacaciones anuales de los empleados?",
+        "¿Cómo funciona el reembolso de viajes internacionales?"
       ],
       fr: [
-        "Quelle est la taille maximale de la charge utile de l'API Gateway?",
-        "Combien de temps les jetons d'authentification sont-ils valides?",
-        "Quelles sont les consignes de conservation des journaux d'audit?"
+        "Quels sont les avantages d'assurance maladie disponibles?",
+        "Quel est le droit aux congés annuels des employés?"
       ],
       de: [
-        "Was ist die maximale Nutzlastgröße des API Gateways?",
-        "Wie lange sind Authentifizierungstokens gültig?",
-        "Was sind die Speicherrichtlinien für Überwachungsprotokolle?"
+        "Welche Krankenversicherungsleistungen stehen Mitarbeitern zu?",
+        "Wie hoch ist der Jahresurlaubsanspruch der Mitarbeiter?"
       ],
       hi: [
-        "API गेटवे की अधिकतम पेलोड सीमा क्या है?",
-        "प्रमाणीकरण टोकन कितने समय तक मान्य रहते हैं?",
-        "ऑडिट लॉग के लिए डेटा रिटेंशन दिशानिर्देश क्या हैं?"
-      ],
-      ja: [
-        "API Gatewayの最大ペイロードサイズは何ですか？",
-        "認証トークンの有効期間はどのくらいですか？",
-        "監査ログのデータ保持ガイドラインは何ですか？"
+        "कर्मचारियों के लिए कौन से स्वास्थ्य बीमा लाभ उपलब्ध हैं?",
+        "कर्मचारियों के लिए वार्षिक छुट्टी का अधिकार क्या है?"
       ]
     };
 
@@ -578,7 +394,7 @@
       chipsContainer.innerHTML = '';
       
       const queries = sampleQueries[lang] || sampleQueries.en;
-      queries.forEach((q, idx) => {
+      queries.forEach((q) => {
         const chip = document.createElement('div');
         chip.className = 'sample-chip';
         chip.innerText = q;
@@ -590,16 +406,6 @@
       document.getElementById('queryInput').value = queries[0];
     }
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.pathway-btn').forEach(el => {
-        if (!el.classList.contains('external')) el.classList.remove('active');
-      });
-
-      document.getElementById('tab-' + tabId).classList.add('active');
-      event.target.classList.add('active');
-    }
-
     async function sendRAGQuery() {
       const query = document.getElementById('queryInput').value.trim();
       const lang = document.getElementById('queryLang').value;
@@ -609,7 +415,7 @@
 
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
-      btn.innerHTML = '<div class="spinner"></div> Synthesizing Multilingual Answer...';
+      btn.innerHTML = '<div class="spinner"></div> Synthesizing Answer...';
 
       try {
         const response = await fetch('/ask', {
@@ -624,7 +430,7 @@
         document.getElementById('outputArea').innerHTML = `
           <div class="response-card" style="border-color: var(--danger);">
             <h4 style="color: var(--danger);">Execution Error</h4>
-            <p style="font-size:0.9rem; margin-top:0.5rem;">Failed to connect to RAG API backend. Ensure FastAPI service is running.</p>
+            <p style="font-size:0.9rem; margin-top:0.5rem;">Failed to connect to RAG API backend. Ensure FastAPI service is running on port 8000.</p>
           </div>
         `;
       } finally {
@@ -645,8 +451,8 @@
       `).join('');
 
       let citationsHTML = data.extracted_citations.map(c => `
-        <div class="claim-pill ${c.entailment_status === 'VERIFIED' ? 'claim-verified' : 'claim-contradicted'}">
-          ✓ Claim: "${c.claim_text}" $\\rightarrow$ Cited: ${c.cited_doc_ids.join(', ')} [${c.entailment_status}]
+        <div class="claim-pill">
+          ✓ Cited Documents: ${c.cited_doc_ids.length > 0 ? c.cited_doc_ids.join(', ') : 'Verified Evidence Gate'} [${c.entailment_status}]
         </div>
       `).join('');
 

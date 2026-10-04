@@ -1,23 +1,51 @@
-version: '3.8'
-
 services:
-  web_api:
+  ragops-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mlops_fastapi_service
+    container_name: ragops_fastapi_service
     ports:
       - "8000:8000"
     environment:
-      - MLFLOW_TRACKING_URI=file:///app/mlruns
+      - PYTHONUNBUFFERED=1
+      - USE_TF=0
+      - USE_TORCH=1
+      - MLFLOW_TRACKING_URI=sqlite:////app/mlflow.db
     volumes:
-      - ./models:/app/models
       - ./data:/app/data
+      - ./mlflow.db:/app/mlflow.db
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  airflow:
+    image: apache/airflow:2.8.1-python3.11
+    container_name: ragops_airflow_ui
+    ports:
+      - "8080:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - AIRFLOW__WEBSERVER__SECRET_KEY=ragops_secret_key_12345
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__WEBSERVER__AUTHENTICATE=false
+      - AIRFLOW__WEBSERVER__AUTH_ROLE_PUBLIC=Admin
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
+    command: standalone
     restart: always
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: mlops_prometheus
+    container_name: ragops_prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -26,18 +54,19 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     depends_on:
-      - web_api
+      - ragops-api
     restart: always
 
   grafana:
     image: grafana/grafana:latest
-    container_name: mlops_grafana
+    container_name: ragops_grafana
     ports:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
     restart: always

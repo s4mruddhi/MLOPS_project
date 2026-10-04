@@ -1,0 +1,21 @@
+query_id,query_text,category
+Q-101,What is the maximum allowed API request payload size according to corporate gateway guidelines?,engineering
+Q-102,How many hours remain until authentication tokens expire before re-authentication is required?,security
+Q-103,What is the formal procedure for requesting hardware peripheral accessories for developer workstations?,it
+Q-104,What are the rules regarding remote work and work-from-home eligibility for full-time employees?,hr
+Q-105,How is employee performance evaluated annually during the performance review cycle?,hr
+Q-106,What is the company policy on paid parental leave and personal time off accrual?,hr
+Q-107,What are the mandatory password complexity rules for enterprise system accounts?,security
+Q-108,What is the data retention policy for customer relational database backups and logs?,engineering
+Q-109,How do employees report potential data breaches or security incident threats?,security
+Q-110,What is the process for submitting corporate expense reimbursement claims and receipts?,finance
+Q-111,What are the legal guidelines for open source software integration in internal products?,legal
+Q-112,What is the standard SLA metric for critical IT infrastructure outage resolution?,it
+Q-113,What is the procedure for granting temporary administrator access to production servers?,security
+Q-114,How is intellectual property ownership governed for employee inventions created at work?,legal
+Q-115,What are the corporate travel expense allowance limits for international trips?,finance
+Q-116,What are the mandatory steps for onboarding a newly hired software engineer?,hr
+Q-117,How frequently are external security penetration tests conducted on public endpoints?,security
+Q-118,What is the company policy regarding secondary employment or external consulting work?,hr
+Q-119,What are the disaster recovery requirements for core payment gateway services?,engineering
+Q-120,What are the employee wellness and mental health support healthcare benefits?,hr

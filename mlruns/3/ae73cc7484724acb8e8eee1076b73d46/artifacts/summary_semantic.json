@@ -1,0 +1,14 @@
+{
+  "retrieval_method": "semantic",
+  "metrics": {
+    "total_questions_evaluated": 20,
+    "mean_groundedness_score": 1.0,
+    "mean_answer_relevance": 0.6868,
+    "citation_correctness_rate": 1.0,
+    "unsupported_claim_rate": 0.0
+  },
+  "params": {
+    "airflow_dag": "ragops_enterprise_pipeline"
+  },
+  "timestamp": "2026-10-03T22:47:53.807675"
+}

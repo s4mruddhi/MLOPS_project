@@ -2,60 +2,82 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_ENV = 'venv'
-        AWS_REGION = 'us-east-1'
-        AWS_S3_BUCKET = 'ragops-enterprise-knowledge-bucket'
+        USE_TF = '0'
+        USE_TORCH = '1'
+        PYTHONUNBUFFERED = '1'
+        MLFLOW_TRACKING_URI = 'sqlite:///mlflow.db'
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout & Environment Setup') {
             steps {
-                git branch: 'main', url: 'https://github.com/samrudhideshmukh12413724/MLOPS_project.git'
+                echo 'Checking out RAGOps Pipeline Repository...'
+
+                checkout scm
+
+                sh 'pwd'
+                sh 'ls -la'
+
+                sh 'python3 -m pip install --upgrade pip --break-system-packages || true'
+                sh 'pip3 install --break-system-packages -r requirements.txt || pip install --break-system-packages -r requirements.txt || true'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Phase 4: Document Validation & Chunking') {
             steps {
-                bat 'python -m pip install --upgrade pip'
-                bat 'pip install -r requirements.txt'
+                sh 'python3 scripts/run_phase4_pipeline.py'
             }
         }
 
-        stage('Document Ingestion & Validation') {
+        stage('Phase 5 & 7: Vector Indexing & Retrieval Evaluation') {
             steps {
-                bat 'python src/data/ingestion.py'
-                bat 'python -c "from src.data.ingestion import ingest_data; from src.data.validation import DataValidator; DataValidator.validate(ingest_data())"'
+                sh 'python3 scripts/run_phase5_pipeline.py'
+                sh 'python3 scripts/run_phase7_evaluation.py'
             }
         }
 
-        stage('RAG Embedding & Vector Indexing') {
+        stage('Phase 8 & 10: MLflow Tracking & RAG Evaluation') {
             steps {
-                bat 'python -c "import json; from src.data.preprocessing import preprocess_rag_data; docs=json.load(open(\'data/raw/knowledge_docs.json\')); preprocess_rag_data(docs, fit=True)"'
+                sh 'python3 scripts/run_phase8_mlflow.py'
+                sh 'python3 scripts/run_phase10_evaluation.py'
             }
         }
 
-        stage('RAG Candidate Benchmark & MLflow Registration') {
+        stage('Phase 11: Airflow DAG Pipeline Execution') {
             steps {
-                bat 'python src/models/train.py'
+                sh 'python3 scripts/run_phase11_pipeline.py'
+            }
+        }
+
+        stage('Phase 12, 14 & 15: REST API, Monitoring & Drift Audits') {
+            steps {
+                sh 'python3 scripts/run_phase12_pipeline.py'
+                sh 'python3 scripts/run_phase14_monitoring.py'
+                sh 'python3 scripts/run_phase15_drift.py'
             }
         }
 
         stage('Run Pytest Integration Suite') {
             steps {
-                bat 'python -m pytest tests/ -v'
+                sh 'python3 -m pytest tests/ -v'
             }
         }
 
-        stage('Docker Image Build') {
+        stage('Phase 13: Docker Image Build') {
             steps {
-                bat 'docker build -t ragops-assistant-api:latest .'
+                sh 'docker build -t ragops-assistant-api:latest .'
             }
         }
     }
 
     post {
         always {
-            echo 'RAGOps Jenkins Pipeline Completed.'
+            echo '=================================================='
+            echo 'RAGOps Enterprise Jenkins CI/CD Pipeline Completed'
+            echo '=================================================='
+        }
+        success {
+            echo 'Pipeline Build & Validation PASSED.'
         }
     }
 }

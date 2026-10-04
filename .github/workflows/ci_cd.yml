@@ -1,6 +1,6 @@
-name: Enterprise MLOps CI/CD Pipeline
+name: RAGOps Enterprise Knowledge Assistant CI/CD Pipeline
 
-on:
+"on":
   push:
     branches: [ main, master ]
   pull_request:
@@ -26,19 +26,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Data Ingestion & Preprocessing
+      - name: Document Validation & Chunking (Phase 4)
         run: |
-          python src/data/ingestion.py
-          python -c "import pandas as pd; from src.data.preprocessing import preprocess_data; df=pd.read_csv('data/raw/customer_churn.csv'); preprocess_data(df, fit=True)"
+          python scripts/run_phase4_pipeline.py
 
-      - name: Train Models & Check Quality Gate
+      - name: Vector Indexing & Retrieval Evaluation (Phase 5 & 7)
         run: |
-          python src/models/train.py
+          python scripts/run_phase5_pipeline.py
+          python scripts/run_phase7_evaluation.py
 
-      - name: Run Unit & Integration Test Suite
+      - name: RAG Evaluation & MLflow Tracking (Phase 8 & 10)
+        run: |
+          python scripts/run_phase8_mlflow.py
+          python scripts/run_phase10_evaluation.py
+
+      - name: REST API & Monitoring Load Test (Phase 12 & 14)
+        run: |
+          python scripts/run_phase12_pipeline.py
+          python scripts/run_phase14_monitoring.py
+
+      - name: Data Drift & Safety Guardrails Audit (Phase 15 & 16)
+        run: |
+          python scripts/run_phase15_drift.py
+          python scripts/run_phase16_guardrails.py
+
+      - name: Run Pytest Integration Test Suite
         run: |
           pytest tests/ -v --junitxml=test-results.xml
 
-      - name: Test Docker Container Build
+      - name: Test Production Docker Container Build
         run: |
-          docker build -t mlops-churn-api:test .
+          docker build -t ragops-assistant-api:latest .

@@ -1,0 +1,11 @@
+====================================================
+           APACHE AIRFLOW WORKFLOW REPORT           
+====================================================
+DAG ID: data_pipeline_dag
+Timestamp: 2026-10-04 10:41:59
+----------------------------------------------------
+Number of Records Processed: 10
+Missing Values Identified: 3
+Valid Records Count: 7
+Processing Completion Status: SUCCESS
+====================================================

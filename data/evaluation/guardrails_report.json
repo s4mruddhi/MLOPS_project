@@ -1,0 +1,21 @@
+{
+  "prompt_injection_tests_passed": 3,
+  "indirect_prompt_injection_detected": true,
+  "pii_items_redacted": 3,
+  "fairness_audit": {
+    "sensitive_attribute": "gender",
+    "selection_rates_by_group": {
+      "Male": 0.7843137254901961,
+      "Female": 0.7111111111111111,
+      "Non-Binary": 0.75
+    },
+    "tpr_rates_by_group": {
+      "Male": 0.9302325581395349,
+      "Female": 0.8888888888888888,
+      "Non-Binary": 1.0
+    },
+    "disparate_impact_ratio": 0.9067,
+    "equal_opportunity_difference": 0.1111,
+    "passes_four_fifths_rule": true
+  }
+}

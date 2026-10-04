@@ -1,0 +1,12 @@
+Context Documents:
+{context_documents}
+
+User Question:
+{user_question}
+
+Instructions:
+1. Synthesize a concise, direct answer based strictly on the context above.
+2. Provide explicit bracketed citations [Chunk_ID] for every key fact.
+3. If context does not contain the answer, reply with exact fallback message.
+
+Structured Answer with Citations [Chunk_ID]:

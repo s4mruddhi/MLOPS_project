@@ -1,0 +1,29 @@
+groups:
+  - name: ragops_alerts
+    rules:
+      - alert: HighQueryLatency
+        expr: histogram_quantile(0.95, sum(rate(ragops_query_latency_seconds_bucket[5m])) by (le)) > 1.0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High RAG query latency detected (p95 > 1.0s)"
+          description: "The 95th percentile query latency is {{ $value }}s, exceeding 1.0s threshold."
+
+      - alert: HighErrorRate
+        expr: sum(rate(ragops_http_errors_total[5m])) / sum(rate(ragops_http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High API Error Rate (> 5%)"
+          description: "The proportion of HTTP server errors exceeds 5% over 5 minutes."
+
+      - alert: LowRetrievalScore
+        expr: ragops_top_retrieval_score < 0.35
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low Top Retrieval Score (< 0.35)"
+          description: "Top retrieved document similarity score is {{ $value }}, indicating poor candidate relevance."
