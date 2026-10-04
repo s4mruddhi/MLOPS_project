@@ -1,0 +1,34 @@
+---
+document_id: FIN-003
+title: Receipt and Documentation Requirements
+department: Finance
+category: Documentation
+version: "1.1"
+effective_date: "2026-02-01"
+source: Internal Finance Knowledge Base
+access_level: employee
+---
+
+# Receipt and Documentation Requirements
+
+## Purpose
+
+To specify acceptable forms of documentation for business expense reporting and audit compliance.
+
+## Acceptable Receipt Formats
+
+1. Original merchant-issued itemized paper receipts.
+2. Official electronic invoices or receipts in PDF format.
+3. Itemized digital receipts from mobile ride-hailing, hotel, or airline applications.
+
+## Unacceptable Documentation
+
+- Bank or credit card statements without itemized merchant receipts.
+- Handwritten un-itemized slips without merchant tax identification details.
+- Estimated expense summary spreadsheets.
+
+## Missing Receipt Procedure
+
+If a receipt is lost or unavailable, the employee must complete the Missing Receipt Declaration Form.
+
+Claims with missing receipts over $50 require written approval from the Department Director.

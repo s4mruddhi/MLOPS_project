@@ -1,0 +1,32 @@
+---
+document_id: SEC-002
+title: Phishing and Suspicious Email Reporting
+department: Cybersecurity
+category: Phishing
+version: "1.0"
+effective_date: "2026-01-15"
+source: Security Operations Guide
+access_level: employee
+---
+
+# Phishing and Suspicious Email Reporting Procedure
+
+## Purpose
+
+Guidelines for identifying, reporting, and responding to potential phishing emails, social engineering attacks, and unauthorized communications.
+
+## Key Indicators of Phishing
+
+- Mismatched sender domain names or suspicious display names.
+- Urgent demands for credentials, wire transfers, or gift card purchases.
+- Unexpected attachments containing executable files or macro-enabled documents.
+
+## Reporting Steps
+
+1. Click the "Report Phishing" button in the Outlook toolbar.
+2. Alternatively, forward the suspicious email as an attachment to `phishing@company-internal.com`.
+3. Do not click links, open attachments, or reply to the email.
+
+## Incident Remediation
+
+If an employee accidentally clicks a suspicious link or inputs credentials, they must immediately change their password and notify the Security Operations Center (SOC) at extension 4444.

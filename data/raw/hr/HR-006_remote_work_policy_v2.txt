@@ -1,0 +1,22 @@
+---
+document_id: HR-006
+title: Remote Work Policy v2.0
+department: HR
+category: WFH
+version: "2.0"
+effective_date: "2026-01-01"
+source: HR Policy Handbook
+access_level: employee
+---
+
+# Remote Work Policy (v2.0 - Current)
+
+## Purpose
+
+Current active guidelines regarding hybrid and remote work allocations effective 2026.
+
+## Remote Work Days Allocation
+
+Full-time employees are eligible to work remotely up to 3 days per week upon manager approval.
+
+A minimum of 2 days per week in-office presence is required for all team members under this active policy version.

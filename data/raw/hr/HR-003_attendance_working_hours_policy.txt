@@ -1,0 +1,28 @@
+---
+document_id: HR-003
+title: Attendance and Working Hours Policy
+department: HR
+category: Attendance
+version: "1.0"
+effective_date: "2026-01-01"
+source: HR Policy Handbook
+access_level: employee
+---
+
+# Attendance and Working Hours Policy
+
+## Purpose
+
+Defines standard operating hours, flexible scheduling options, and attendance reporting requirements.
+
+## Standard Working Hours
+
+The standard workweek consists of 40 hours, typically scheduled Monday through Friday, 8 hours per day.
+
+## Flexible Schedule
+
+Employees may adjust their start time between 8:00 AM and 10:00 AM with line manager agreement, provided core hours (10:00 AM - 4:00 PM) are covered.
+
+## Absence Reporting
+
+Unplanned absences due to illness or emergency must be reported to the reporting manager and HR portal by 9:00 AM on the day of absence.

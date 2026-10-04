@@ -1,0 +1,30 @@
+---
+document_id: TR-002
+title: International Business Travel Policy
+department: Travel
+category: International
+version: "1.0"
+effective_date: "2026-02-01"
+source: Corporate Travel Policy
+access_level: employee
+---
+
+# International Business Travel Policy
+
+## Purpose
+
+Defines travel authorization requirements, health & safety precautions, and per diem allowances for international trips.
+
+## Pre-Travel Requirements
+
+1. International travel requires approval at least 14 days prior to departure.
+2. Passport validity must extend at least 6 months beyond the planned return date.
+3. Employees must check destination visa requirements via the Travel Portal.
+
+## Health and Travel Insurance
+
+All international business travelers are automatically covered by emergency medical and travel assistance insurance. Contact details are printed on the digital travel card.
+
+## Per Diem Rates
+
+International meal and incidental per diems vary by country according to official government published travel rates.

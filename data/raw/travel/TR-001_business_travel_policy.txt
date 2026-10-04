@@ -1,0 +1,58 @@
+---
+document_id: TR-001
+title: Business Travel and Expense Policy
+department: Travel
+category: Travel
+version: "1.0"
+effective_date: "2026-02-01"
+source: Internal Travel Policy
+access_level: employee
+---
+
+# Business Travel and Expense Policy
+
+## Purpose
+
+This policy defines the process for requesting business travel and claiming eligible travel expenses.
+
+## Travel Approval
+
+Employees must obtain manager approval before booking business travel.
+
+Travel requests should include the business purpose, destination, expected travel dates, and estimated expenses.
+
+Employees should use the organization's approved travel booking process whenever available.
+
+## Transportation
+
+Economy-class air travel is the standard option for business trips.
+
+Higher-class travel requires an approved business exception.
+
+Employees should select reasonably priced transportation options that meet the business requirement.
+
+## Accommodation
+
+Employees may claim reasonable hotel expenses for approved business travel.
+
+The selected accommodation should be appropriate for the business location and within the organization's applicable travel limits.
+
+## Meals
+
+Reasonable meal expenses incurred during approved business travel may be reimbursed according to the applicable expense limits.
+
+Employees must retain itemized receipts where required.
+
+## Expense Claims
+
+Expense claims should be submitted through the organization's expense management system after the trip.
+
+The claim should include the travel dates, business purpose, expense category, amount, and required supporting receipts.
+
+## Non-Reimbursable Expenses
+
+Personal entertainment, minibar purchases, and expenses unrelated to the approved business trip are not normally reimbursable.
+
+## Exceptions
+
+Exceptions to this policy require documented approval from the appropriate manager or finance authority.

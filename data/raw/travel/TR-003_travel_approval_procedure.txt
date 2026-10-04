@@ -1,0 +1,26 @@
+---
+document_id: TR-003
+title: Travel Approval Procedure
+department: Travel
+category: Approval
+version: "1.0"
+effective_date: "2026-01-15"
+source: Corporate Travel Policy
+access_level: manager
+---
+
+# Travel Approval Procedure
+
+## Purpose
+
+Workflow and authorization thresholds for managers reviewing domestic and international business travel requests.
+
+## Approval Hierarchy
+
+- Domestic travel under $1,500: Reporting Manager approval.
+- Domestic travel $1,500–$5,000: Department Director approval.
+- International travel or any travel over $5,000: Vice President (VP) approval required.
+
+## Evaluation Criteria
+
+Approvers must verify business necessity, budget availability, cost efficiency of proposed flight options, and compliance with lead-time policies.

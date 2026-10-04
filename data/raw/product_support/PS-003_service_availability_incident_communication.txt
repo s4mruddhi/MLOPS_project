@@ -1,0 +1,30 @@
+---
+document_id: PS-003
+title: Service Availability and Incident Communication
+department: Product Support
+category: Availability
+version: "1.0"
+effective_date: "2026-01-15"
+source: Customer Success Operations
+access_level: employee
+---
+
+# Service Availability and Incident Communication
+
+## Purpose
+
+Outlines commitments for platform availability uptime and customer notification standards during service disruptions.
+
+## Service Level Agreements (SLA)
+
+The platform targets an annual availability SLA of 99.9% excluding scheduled maintenance windows.
+
+## Maintenance Windows
+
+Planned maintenance is scheduled exclusively during off-peak hours: Sundays between 02:00 UTC and 04:00 UTC.
+
+Customers must receive at least 72 hours advance notice via email and status portal notifications prior to any planned window.
+
+## Incident Communication Standard
+
+During unannounced outages, the initial status page incident report must be published within 15 minutes of incident detection, with update postings every 30 minutes until resolution.

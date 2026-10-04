@@ -1,0 +1,28 @@
+---
+document_id: IT-003
+title: Company Laptop Usage Policy
+department: IT
+category: Hardware
+version: "1.0"
+effective_date: "2026-01-05"
+source: IT Operations Guide
+access_level: employee
+---
+
+# Company Laptop Usage Policy
+
+## Purpose
+
+Establishes rules for appropriate care, security controls, and acceptable use of company-owned laptops and peripherals.
+
+## Disk Encryption
+
+All corporate laptops are protected by full-disk BitLocker/FileVault encryption. Disabling encryption software is strictly prohibited.
+
+## Lost or Stolen Equipment
+
+If a company laptop is lost or stolen, the employee must report the incident to IT Security (`soc@company-internal.com`) within 2 hours to initiate remote device wipe procedures.
+
+## Personal Use
+
+Incidental personal use of company laptops (such as personal web browsing during breaks) is permitted provided it adheres to acceptable use guidelines and does not compromise system performance.

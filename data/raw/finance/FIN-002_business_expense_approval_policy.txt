@@ -1,0 +1,32 @@
+---
+document_id: FIN-002
+title: Business Expense Approval Policy
+department: Finance
+category: Approval
+version: "1.0"
+effective_date: "2026-01-10"
+source: Internal Finance Policy
+access_level: manager
+---
+
+# Business Expense Approval Policy
+
+## Purpose
+
+This document establishes authorization limits and approval workflows for corporate expenditure and expense claims.
+
+## Approval Matrix
+
+- Direct Line Managers: Authorized to approve individual expense claims up to $1,000.
+- Department Directors: Authorized to approve expense claims up to $10,000.
+- Chief Financial Officer (CFO): Mandatory approval required for any expense claim exceeding $10,000.
+
+## Approval Responsibilities
+
+Approvers must verify that the expenses are reasonable, necessary for business operations, properly documented with receipts, and compliant with corporate policy.
+
+Self-approval of personal expense claims is strictly prohibited under all circumstances.
+
+## Escalation Workflow
+
+Claims exceeding a manager's authorized threshold must be automatically routed through the finance system to the next higher approval level.

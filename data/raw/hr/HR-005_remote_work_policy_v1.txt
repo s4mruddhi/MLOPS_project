@@ -1,0 +1,22 @@
+---
+document_id: HR-005
+title: Remote Work Policy v1.0
+department: HR
+category: WFH
+version: "1.0"
+effective_date: "2024-01-01"
+source: Legacy HR Policy
+access_level: employee
+---
+
+# Remote Work Policy (v1.0 - Superseded)
+
+## Purpose
+
+Historical guidelines regarding remote work eligibility established in 2024.
+
+## Remote Work Days Allocation
+
+Full-time employees who have completed at least 6 months of continuous service are eligible to work remotely up to 2 days per week upon manager approval.
+
+A minimum of 3 days per week in-office presence is mandatory for all team members under this policy version.

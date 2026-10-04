@@ -1,0 +1,54 @@
+---
+document_id: IT-001
+title: VPN Access and Troubleshooting Guide
+department: IT
+category: VPN
+version: "1.0"
+effective_date: "2026-01-15"
+source: Internal IT Knowledge Base
+access_level: employee
+---
+
+# VPN Access and Troubleshooting Guide
+
+## Purpose
+
+This guide explains how employees can connect to the organization's corporate VPN and resolve common connection problems.
+
+## VPN Access
+
+Employees must use their organization-issued account to authenticate to the corporate VPN.
+
+Multi-factor authentication is required when connecting from an external network.
+
+Employees should use the approved VPN client provided by the IT department.
+
+## Connection Procedure
+
+1. Open the approved VPN client.
+2. Select the corporate VPN profile.
+3. Enter the organization-issued username and password.
+4. Complete the multi-factor authentication challenge.
+5. Confirm that the VPN client reports a connected status.
+
+## Troubleshooting
+
+If the VPN connection fails, employees should first verify that their internet connection is working.
+
+The employee should then restart the VPN client and attempt the connection again.
+
+If the problem continues, the employee should restart the device and retry the connection.
+
+Employees should not disable endpoint security software to resolve VPN problems.
+
+## Password Problems
+
+Employees must not share their passwords with IT personnel or other employees.
+
+If authentication fails because of an incorrect password, the employee should use the organization's approved password-reset process.
+
+## Support
+
+If the problem remains unresolved after the recommended troubleshooting steps, the employee should contact the IT Service Desk and provide the error message and approximate time of the failed connection.
+
+IT support may request additional diagnostic information when investigating the incident.

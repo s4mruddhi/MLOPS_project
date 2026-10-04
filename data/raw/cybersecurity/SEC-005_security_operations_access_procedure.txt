@@ -1,0 +1,33 @@
+---
+document_id: SEC-005
+title: Security Operations Access Procedure
+department: Cybersecurity
+category: Access Control
+version: "1.0"
+effective_date: "2026-01-01"
+source: Internal SOC Manual
+access_level: restricted
+---
+
+# Security Operations Access Procedure (Restricted)
+
+## Purpose
+
+This restricted procedure documents emergency break-glass procedures and privilege escalation protocols for Security Operations Center (SOC) personnel.
+
+## Emergency Break-Glass Credentials
+
+Break-glass administrative accounts for core domain controllers and cloud tenant roots are stored in the Hardware Security Module (HSM) key vault.
+
+Accessing HSM keys requires dual-custody authorization from both the Head of Cybersecurity and Lead Infrastructure Architect.
+
+## Emergency Privilege Escalation Steps
+
+1. Initiate Break-Glass ticket in SOC Emergency Management system.
+2. Trigger dual MFA prompt sent to authorizing executives.
+3. Retrieve single-use session tokens valid for maximum 4 hours.
+4. All actions performed under break-glass accounts are logged directly to append-only immutable audit logs.
+
+## Audit and Reconciliation
+
+Within 24 hours of break-glass usage, a mandatory post-incident audit report must be submitted to the Security Governance Committee.

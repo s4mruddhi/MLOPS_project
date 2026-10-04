@@ -1,0 +1,37 @@
+---
+document_id: FIN-001
+title: Expense Reimbursement Policy
+department: Finance
+category: Reimbursement
+version: "1.0"
+effective_date: "2026-01-01"
+source: Internal Finance Policy
+access_level: employee
+---
+
+# Expense Reimbursement Policy
+
+## Purpose
+
+This policy outlines the procedure and guidelines for employees seeking reimbursement for out-of-pocket business expenses.
+
+## Eligibility and Scope
+
+All active full-time and part-time employees are eligible to claim business expenses incurred during official duties.
+
+## Reimbursement Guidelines
+
+1. Expenses must be directly related to legitimate business operations.
+2. Expense claims must be submitted within 30 days of incurring the expense.
+3. Claims submitted after 60 days will not be processed without CFO approval.
+4. Reimbursements are processed within 10 business days following manager approval.
+
+## Receipt Requirements
+
+Itemized receipts are strictly required for any individual expense item exceeding $25.
+
+Digital copies or clear scanned receipts attached to the expense portal are mandatory.
+
+## Non-Reimbursable Items
+
+Personal entertainment, alcoholic beverages (unless explicitly approved for client events), traffic fines, and non-business subscriptions are not eligible for reimbursement.

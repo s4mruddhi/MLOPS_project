@@ -1,0 +1,29 @@
+---
+document_id: PS-004
+title: Software Installation and Approved Applications
+department: Product Support
+category: Software
+version: "1.0"
+effective_date: "2026-01-25"
+source: IT & Support Catalog
+access_level: employee
+---
+
+# Software Installation and Approved Applications Guide
+
+## Purpose
+
+Details the catalog of pre-approved desktop and cloud applications permitted on corporate workstations.
+
+## Approved Application Catalog
+
+- Web Browsers: Google Chrome (Enterprise Edition), Mozilla Firefox ESR, Microsoft Edge.
+- Developer Tools: Visual Studio Code, Git, Docker Desktop (Enterprise licensed).
+- Communication: Slack, Zoom Desktop Client, Microsoft Teams.
+- Productivity: Microsoft 365 Suite.
+
+## Software Request Process
+
+To request software outside the approved catalog, employees must submit a Software Request ticket via the Service Portal.
+
+All requested software undergoes automated vulnerability scanning and IT Security approval before deployment.

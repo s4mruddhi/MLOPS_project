@@ -1,0 +1,31 @@
+---
+document_id: PS-001
+title: Product Troubleshooting Guide
+department: Product Support
+category: Troubleshooting
+version: "1.0"
+effective_date: "2026-01-05"
+source: Product Engineering KB
+access_level: employee
+---
+
+# Product Troubleshooting Guide
+
+## Purpose
+
+Standardized instructions for diagnosing and resolving common platform performance degradation, login failures, and UI rendering issues.
+
+## General Troubleshooting Workflow
+
+1. Verify system operational status on the official Status Dashboard.
+2. Perform hard browser refresh (`Ctrl+F5` or `Cmd+Shift+R`) to clear cached frontend scripts.
+3. Clear browser cookies and local storage for the product domain.
+4. Test connectivity in an incognito/private browser window.
+
+## Network & API Troubleshooting
+
+If API requests return `504 Gateway Timeout` or `502 Bad Gateway`, check internal proxy configurations and verify backend service health via the diagnostics command.
+
+## Error Reporting
+
+If issues persist, collect browser console error logs and network HAR traces before opening a ticket with Product Support Tier 2.

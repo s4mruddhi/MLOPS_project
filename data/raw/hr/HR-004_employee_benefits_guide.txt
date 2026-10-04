@@ -1,0 +1,28 @@
+---
+document_id: HR-004
+title: Employee Benefits Guide
+department: HR
+category: Benefits
+version: "1.2"
+effective_date: "2026-02-01"
+source: Total Rewards Overview
+access_level: employee
+---
+
+# Employee Benefits Guide
+
+## Purpose
+
+Summarizes corporate benefits package including health coverage, retirement matching, and wellness allowances.
+
+## Health and Dental Coverage
+
+Comprehensive medical, vision, and dental insurance plans take effect on the first day of employment. Premium contributions are co-funded by the organization.
+
+## Retirement Plan (401k)
+
+The organization matches employee 401(k) contributions dollar-for-dollar up to 5% of eligible base salary. Contributions vest immediately.
+
+## Wellness Allowance
+
+Employees receive an annual $500 wellness allowance for fitness memberships, athletic gear, or mental health applications.

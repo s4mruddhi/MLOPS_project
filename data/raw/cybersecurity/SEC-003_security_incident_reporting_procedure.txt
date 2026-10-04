@@ -1,0 +1,33 @@
+---
+document_id: SEC-003
+title: Security Incident Reporting Procedure
+department: Cybersecurity
+category: Incident
+version: "1.2"
+effective_date: "2026-02-10"
+source: Incident Response Framework
+access_level: employee
+---
+
+# Security Incident Reporting Procedure
+
+## Purpose
+
+To define the steps for reporting suspected security incidents, data breaches, lost hardware, or unauthorized system access.
+
+## Reportable Incidents
+
+- Lost or stolen company laptops, smartphones, or storage media.
+- Unexplained system behavior or ransomware warnings.
+- Suspected unauthorized access to customer or corporate data.
+- Exposure of sensitive credentials or source code.
+
+## Reporting Timeline and Contacts
+
+1. Employees must report any security incident within 1 hour of discovery.
+2. Contact the 24/7 Security Operations Center (SOC) hotline at extension 4444 or email `soc@company-internal.com`.
+3. Provide details: device ID, time of occurrence, symptoms observed, and impacted data types.
+
+## Incident Containment
+
+Do not attempt to perform manual forensic analysis. Disconnect the device from corporate Wi-Fi/Ethernet immediately, but leave the power ON unless instructed otherwise by the SOC.

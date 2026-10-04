@@ -1,0 +1,30 @@
+---
+document_id: HR-002
+title: Work From Home Policy
+department: HR
+category: WFH
+version: "1.0"
+effective_date: "2026-01-10"
+source: HR Policy Handbook
+access_level: employee
+---
+
+# Work From Home Policy
+
+## Purpose
+
+Sets operational expectations, core working hours, and hardware standards for remote working arrangements.
+
+## Core Working Hours
+
+Remote employees must be accessible for team collaboration during core business hours: 10:00 AM to 4:00 PM local time.
+
+## Home Office Setup & Equipment
+
+The company provides a standard ergonomic workstation bundle comprising a laptop, dual monitors, keyboard, mouse, and headset.
+
+A one-time home office setup stipend of $300 is available for eligible remote employees upon completing probation.
+
+## Ergonomic Guidelines
+
+Employees must ensure their remote workspace is equipped with suitable lighting, ergonomic seating, and secure internet connectivity.

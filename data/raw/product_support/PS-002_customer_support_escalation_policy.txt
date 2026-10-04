@@ -1,0 +1,28 @@
+---
+document_id: PS-002
+title: Customer Support Escalation Policy
+department: Product Support
+category: Escalation
+version: "1.1"
+effective_date: "2026-02-01"
+source: Support Operations Manual
+access_level: employee
+---
+
+# Customer Support Escalation Policy
+
+## Purpose
+
+Defines tier boundaries, response SLAs, and escalation pathways for customer-reported issues.
+
+## Support Tier Matrix
+
+- Tier 1 (Helpdesk): General inquiry resolution, password resets, basic navigation guidance. Response SLA: 1 hour.
+- Tier 2 (Technical Support): Complex technical configuration, bug verification, API troubleshooting. Response SLA: 4 hours.
+- Tier 3 (Engineering): Core code defect remediation, database patching, infrastructure failure. Response SLA: 12 hours.
+
+## Severity 1 Escalation Protocol
+
+Severity 1 (System Down / Critical Impact) incidents bypass standard queue routing.
+
+Support agents must immediately trigger the Incident On-Call pager via PagerDuty and notify the Support Manager.

@@ -33,18 +33,25 @@ def run_phase5():
     sample_query = "What is the annual leave entitlement for employees?"
     query_results = vector_store.query(sample_query, n_results=3)
     
+    added_count = index_result.get('added_count', len(chunk_records))
+    total_items = index_result.get('total_items_in_collection', vector_store.collection.count() if hasattr(vector_store, 'collection') else len(chunk_records))
+    indexing_time = index_result.get('indexing_time', 0.0)
+
     print("=" * 60)
     print("PHASE 5 CHROMADB INDEXING REPORT")
     print("=" * 60)
     print(f"Chunks Input Count:           {len(chunk_records)}")
-    print(f"Chunks Indexed in ChromaDB:   {index_result['added_count']}")
-    print(f"Total Items in Collection:    {index_result['total_items_in_collection']}")
-    print(f"Indexing Execution Time:      {index_result['indexing_time']:.4f} seconds")
+    print(f"Chunks Indexed in ChromaDB:   {added_count}")
+    print(f"Total Items in Collection:    {total_items}")
+    print(f"Indexing Execution Time:      {indexing_time:.4f} seconds")
     print(f"Embedding Vector Dimensions:  {vector_store.embedding_engine.dimension}")
     print(f"Embedding Model:              {vector_store.embedding_engine.model_name}")
     print("=" * 60)
     print(f"Sample Query: '{sample_query}'")
-    print(f"Retrieved Top Match: [{query_results[0]['chunk_id']}] Score: {query_results[0]['score']}")
+    if query_results and len(query_results) > 0:
+        print(f"Retrieved Top Match: [{query_results[0]['chunk_id']}] Score: {query_results[0]['score']}")
+    else:
+        print("Retrieved Top Match: [None] No chunks indexed")
     print("=" * 60)
     
     return index_result

@@ -1,0 +1,24 @@
+---
+document_id: IT-004
+title: Software Installation Policy
+department: IT
+category: Software
+version: "1.1"
+effective_date: "2026-01-20"
+source: IT Security Standards
+access_level: employee
+---
+
+# Software Installation Policy
+
+## Purpose
+
+Controls software licensing, security risk management, and local administrator privileges on corporate devices.
+
+## Administrator Privileges
+
+Standard user accounts do not possess local administrative rights on corporate laptops. Software installation must be conducted via the IT Software Center portal or requested via ticket.
+
+## Unauthorized Software
+
+Installing peer-to-peer file sharing clients, unapproved remote management tools, or unlicensed commercial software is strictly prohibited.

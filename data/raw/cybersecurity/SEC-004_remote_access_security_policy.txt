@@ -1,0 +1,27 @@
+---
+document_id: SEC-004
+title: Remote Access Security Policy
+department: Cybersecurity
+category: Remote Access
+version: "1.0"
+effective_date: "2026-01-20"
+source: Corporate Security Standard
+access_level: employee
+---
+
+# Remote Access Security Policy
+
+## Purpose
+
+To safeguard organizational assets and network infrastructure when accessed from remote working locations.
+
+## Security Mandates
+
+1. All remote connections to internal resources must route through the corporate encrypted VPN.
+2. Connecting via unencrypted public Wi-Fi without active VPN protection is strictly prohibited.
+3. Screens must lock automatically after 5 minutes of inactivity on remote devices.
+4. USB mass storage devices are disabled by endpoint policy on all remote laptops.
+
+## Physical Security
+
+Employees must ensure that company laptop screens are not visible to unauthorized individuals in public spaces. Laptops must never be left unattended in vehicles or public areas.
