@@ -55,7 +55,9 @@ def run_phase8():
         }
         params.update(extra_params)
         
-        artifacts = [eval_doc_path, dataset_path]
+        rel_eval_doc = os.path.relpath(eval_doc_path, project_root)
+        rel_dataset = os.path.relpath(dataset_path, project_root)
+        artifacts = [rel_eval_doc, rel_dataset]
         
         run_id = tracker.log_retrieval_run(
             retrieval_method=method_name,

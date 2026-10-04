@@ -24,12 +24,22 @@ class RAGOpsMLflowTracker:
         mlflow.set_tracking_uri(self.tracking_uri)
         self.client = MlflowClient()
         
-        # Get or create experiment
+        # Get or create active experiment
         exp = mlflow.get_experiment_by_name(self.experiment_name)
-        if exp is None:
-            self.experiment_id = mlflow.create_experiment(self.experiment_name)
+        if exp is not None:
+            if getattr(exp, "lifecycle_stage", "active") == "deleted":
+                try:
+                    self.client.restore_experiment(exp.experiment_id)
+                    self.experiment_id = exp.experiment_id
+                except Exception:
+                    self.experiment_id = "0"
+            else:
+                self.experiment_id = exp.experiment_id
         else:
-            self.experiment_id = exp.experiment_id
+            try:
+                self.experiment_id = mlflow.create_experiment(self.experiment_name)
+            except Exception:
+                self.experiment_id = "0"
 
     def log_retrieval_run(self, 
                           retrieval_method: str, 
@@ -57,11 +67,14 @@ class RAGOpsMLflowTracker:
             mlflow.log_metric("output_tokens", 100.0)
             mlflow.log_metric("total_cost_usd", 0.00015)
                     
-            # Log Artifacts
+            # Log Artifacts safely
             if artifact_paths:
                 for art in artifact_paths:
                     if os.path.exists(art):
-                        mlflow.log_artifact(art)
+                        try:
+                            mlflow.log_artifact(art)
+                        except Exception as e:
+                            print(f"Warning: MLflow artifact logging skipped for {art}: {e}")
                         
             # Log summary JSON artifact
             summary_dict = {
@@ -70,11 +83,14 @@ class RAGOpsMLflowTracker:
                 "params": params,
                 "timestamp": datetime.now().isoformat()
             }
-            summary_path = f"scratch/summary_{retrieval_method}.json"
+            summary_path = os.path.join("scratch", f"summary_{retrieval_method}.json")
             os.makedirs("scratch", exist_ok=True)
             with open(summary_path, "w", encoding="utf-8") as f:
                 json.dump(summary_dict, f, indent=2)
-            mlflow.log_artifact(summary_path)
+            try:
+                mlflow.log_artifact(summary_path)
+            except Exception as e:
+                print(f"Warning: MLflow summary artifact logging skipped: {e}")
             
             return run_id
 
