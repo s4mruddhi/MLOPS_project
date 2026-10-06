@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Ensure Docker Desktop binary directory is on Windows PATH
-        PATH = "C:\\Users\\samru\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+        // Explicitly inject Python 3.10 and Docker Desktop to PATH for the Windows Service
+        PATH = "C:\\Users\\samru\\AppData\\Local\\Programs\\Python\\Python310;C:\\Users\\samru\\AppData\\Local\\Programs\\Python\\Python310\\Scripts;C:\\Users\\samru\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
         PYTHONUNBUFFERED = '1'
         USE_TF = '0'
         USE_TORCH = '1'
@@ -33,14 +33,14 @@ pipeline {
         stage('Run Automated Tests') {
             steps {
                 echo '=== Stage 3: Running Automated Test Suites (pytest) ==='
-                // Pytest runs all 18 test suites and saves XML reports for Jenkins
+                // Pytest runs all test suites and saves XML reports for Jenkins
                 bat '''
                     python -m pytest tests/ -v --junitxml=test-reports/results.xml
                 '''
             }
             post {
                 always {
-                    // Collect and visualize test results in the Jenkins UI
+                    // Generates visual test history charts in Jenkins UI
                     junit testResults: 'test-reports/results.xml', allowEmptyResults: true
                 }
             }
@@ -85,12 +85,12 @@ pipeline {
         }
         failure {
             echo '======================================================='
-            echo ' CI/CD FAILED: Check the stage logs above for errors.'
+            echo ' CI/CD FAILED: Check stage logs above for errors.'
             echo ' Broken code was BLOCKED from deployment.'
             echo '======================================================='
         }
         always {
-            echo 'Cleaning up workspace artifacts...'
+            echo 'Pipeline execution finished.'
         }
     }
 }
