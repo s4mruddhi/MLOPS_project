@@ -19,6 +19,55 @@ DEFAULT_DB_DIR = os.path.join(PROJECT_ROOT, "data", "processed", "chroma_db")
 class ChromaVectorStore:
     """Manages persistent ChromaDB vector index with full metadata preservation."""
 
+    @staticmethod
+    def _migrate_legacy_schema(db_dir: str):
+        """Migrates legacy ChromaDB collection schema in chroma.sqlite3 to avoid KeyError: '_type'."""
+        sqlite_path = os.path.join(db_dir, "chroma.sqlite3")
+        if not os.path.isfile(sqlite_path):
+            return
+        try:
+            import sqlite3
+            import json
+            conn = sqlite3.connect(sqlite_path)
+            cur = conn.cursor()
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='collections'")
+            if not cur.fetchone():
+                conn.close()
+                return
+
+            cur.execute("SELECT id, config_json_str FROM collections")
+            rows = cur.fetchall()
+            for coll_id, config_json_str in rows:
+                if not config_json_str:
+                    continue
+                try:
+                    data = json.loads(config_json_str)
+                    if isinstance(data, dict) and "_type" not in data:
+                        migrated_config = {
+                            "hnsw_configuration": {
+                                "space": "cosine",
+                                "ef_construction": 100,
+                                "ef_search": 10,
+                                "num_threads": 12,
+                                "M": 16,
+                                "resize_factor": 1.2,
+                                "batch_size": 100,
+                                "sync_threshold": 1000,
+                                "_type": "HNSWConfigurationInternal",
+                            },
+                            "_type": "CollectionConfigurationInternal",
+                        }
+                        cur.execute(
+                            "UPDATE collections SET config_json_str = ? WHERE id = ?",
+                            (json.dumps(migrated_config), coll_id),
+                        )
+                except Exception:
+                    pass
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
     def __init__(self, 
                  db_dir: str = DEFAULT_DB_DIR, 
                  collection_name: str = DEFAULT_COLLECTION_NAME,
@@ -29,6 +78,7 @@ class ChromaVectorStore:
         self.collection_name = collection_name
         self.embedding_engine = EmbeddingEngine(model_name=embedding_model_name)
         
+        self._migrate_legacy_schema(self.db_dir)
         self.client = chromadb.PersistentClient(path=self.db_dir)
         self.collection = self.client.get_or_create_collection(
             name=self.collection_name,
@@ -37,6 +87,7 @@ class ChromaVectorStore:
 
     def reload_index(self):
         """Reloads persistent collection from disk."""
+        self._migrate_legacy_schema(self.db_dir)
         self.client = chromadb.PersistentClient(path=self.db_dir)
         self.collection = self.client.get_or_create_collection(
             name=self.collection_name,
