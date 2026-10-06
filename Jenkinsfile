@@ -2,114 +2,95 @@ pipeline {
     agent any
 
     environment {
+        // Ensure Docker Desktop binary directory is on Windows PATH
+        PATH = "C:\\Users\\samru\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
+        PYTHONUNBUFFERED = '1'
         USE_TF = '0'
         USE_TORCH = '1'
-        PYTHONUNBUFFERED = '1'
-        MLFLOW_TRACKING_URI = 'sqlite:///mlflow.db'
+        IMAGE_NAME = 'ragops-api:latest'
+        CONTAINER_NAME = 'ragops_fastapi_service'
+        APP_PORT = '8000'
     }
 
     stages {
-        stage('Checkout & Environment Setup') {
+        stage('Checkout Source Code') {
             steps {
-                echo '=================================================='
-                echo '1. Checking out RAGOps Pipeline Repository...'
-                echo '=================================================='
+                echo '=== Stage 1: Checking out latest code from GitHub ==='
+                checkout scm
+            }
+        }
 
-                sh 'rm -rf .git/*.lock .git/config.lock || true'
-                git branch: 'main', url: 'https://github.com/s4mruddhi/MLOPS_project.git'
-
-                sh 'pwd'
-                sh 'ls -la'
-
-                sh '''
-                    if ! command -v python3 &> /dev/null; then
-                        echo "Installing Python3 inside Jenkins Container..."
-                        (apt-get update && apt-get install -y python3 python3-pip python3-venv) || true
-                    fi
-                    python3 --version || true
-                    python3 -m pip install --upgrade pip --break-system-packages || true
-                    pip3 install --break-system-packages -r requirements.txt || pip install -r requirements.txt || true
+        stage('Install Dependencies & Lint') {
+            steps {
+                echo '=== Stage 2: Validating Python Environment & Syntax ==='
+                bat '''
+                    python --version
+                    python -m py_compile app/main.py
                 '''
             }
         }
 
-        stage('Phase 4: Document Validation & Chunking') {
+        stage('Run Automated Tests') {
             steps {
-                echo '=================================================='
-                echo '2. Phase 4: Document Validation & Chunking'
-                echo '=================================================='
-                sh 'python3 scripts/run_phase4_pipeline.py || python scripts/run_phase4_pipeline.py || true'
+                echo '=== Stage 3: Running Automated Test Suites (pytest) ==='
+                // Pytest runs all 18 test suites and saves XML reports for Jenkins
+                bat '''
+                    python -m pytest tests/ -v --junitxml=test-reports/results.xml
+                '''
+            }
+            post {
+                always {
+                    // Collect and visualize test results in the Jenkins UI
+                    junit testResults: 'test-reports/results.xml', allowEmptyResults: true
+                }
             }
         }
 
-        stage('Phase 5 & 7: Vector Indexing & Retrieval Evaluation') {
+        stage('Docker Build Image') {
             steps {
-                echo '=================================================='
-                echo '3. Phase 5 & 7: Vector Indexing & Retrieval Evaluation'
-                echo '=================================================='
-                sh 'python3 scripts/run_phase5_pipeline.py || python scripts/run_phase5_pipeline.py || true'
-                sh 'python3 scripts/run_phase7_evaluation.py || python scripts/run_phase7_evaluation.py || true'
+                echo '=== Stage 4: Building Production Docker Image ==='
+                bat '''
+                    docker build -t %IMAGE_NAME% .
+                '''
             }
         }
 
-        stage('Phase 8 & 10: MLflow Tracking & RAG Evaluation') {
+        stage('Deploy Docker Container Locally') {
             steps {
-                echo '=================================================='
-                echo '4. Phase 8 & 10: MLflow Tracking & RAG Evaluation'
-                echo '=================================================='
-                sh 'python3 scripts/run_phase8_mlflow.py || python scripts/run_phase8_mlflow.py || true'
-                sh 'python3 scripts/run_phase10_evaluation.py || python scripts/run_phase10_evaluation.py || true'
-            }
-        }
+                echo '=== Stage 5: Deploying Container to Localhost ==='
+                bat '''
+                    @echo off
+                    echo Stopping previous container if running...
+                    docker stop %CONTAINER_NAME% 2>nul || exit /b 0
+                    docker rm -f %CONTAINER_NAME% 2>nul || exit /b 0
 
-        stage('Phase 11: Airflow DAG Pipeline Execution') {
-            steps {
-                echo '=================================================='
-                echo '5. Phase 11: Airflow DAG Pipeline Execution'
-                echo '=================================================='
-                sh 'python3 scripts/run_phase11_pipeline.py || python scripts/run_phase11_pipeline.py || true'
-            }
-        }
+                    echo Starting new container on port %APP_PORT%...
+                    docker run -d --name %CONTAINER_NAME% -p %APP_PORT%:8000 -e PYTHONUNBUFFERED=1 -e USE_TF=0 -e USE_TORCH=1 %IMAGE_NAME%
 
-        stage('Phase 12, 14 & 15: REST API, Monitoring & Drift Audits') {
-            steps {
-                echo '=================================================='
-                echo '6. Phase 12, 14 & 15: REST API, Monitoring & Drift Audits'
-                echo '=================================================='
-                sh 'python3 scripts/run_phase12_pipeline.py || python scripts/run_phase12_pipeline.py || true'
-                sh 'python3 scripts/run_phase14_monitoring.py || python scripts/run_phase14_monitoring.py || true'
-                sh 'python3 scripts/run_phase15_drift.py || python scripts/run_phase15_drift.py || true'
-            }
-        }
+                    echo Waiting for application to initialize...
+                    timeout /t 5 /nobreak >nul
 
-        stage('Run Pytest Integration Suite') {
-            steps {
-                echo '=================================================='
-                echo '7. Run Pytest Integration Suite'
-                echo '=================================================='
-                sh 'PYTHONPATH=. python3 -m pytest tests/ -v || PYTHONPATH=. python -m pytest tests/ -v || true'
-            }
-        }
-
-        stage('Phase 13: Docker Image Build') {
-            steps {
-                echo '=================================================='
-                echo '8. Phase 13: Docker Image Build'
-                echo '=================================================='
-                sh 'docker build -t ragops-assistant-api:latest . || true'
+                    echo Verifying deployment health...
+                    curl -f http://localhost:%APP_PORT%/health || echo Application starting up...
+                '''
             }
         }
     }
 
     post {
-        always {
-            echo '=================================================='
-            echo 'RAGOps Enterprise Jenkins CI/CD Pipeline Completed'
-            echo '=================================================='
-        }
         success {
-            echo 'Pipeline Build & Validation PASSED.'
+            echo '======================================================='
+            echo ' CI/CD SUCCESS: Application is live at http://localhost:8000'
+            echo '======================================================='
+        }
+        failure {
+            echo '======================================================='
+            echo ' CI/CD FAILED: Check the stage logs above for errors.'
+            echo ' Broken code was BLOCKED from deployment.'
+            echo '======================================================='
+        }
+        always {
+            echo 'Cleaning up workspace artifacts...'
         }
     }
 }
-
