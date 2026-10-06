@@ -42,7 +42,8 @@ class OllamaClient:
         }
         payload = json.dumps(payload_data).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=15) as response:
+        timeout_sec = int(os.getenv("OLLAMA_TIMEOUT", "60"))
+        with urllib.request.urlopen(req, timeout=timeout_sec) as response:
             res = json.loads(response.read().decode("utf-8"))
             return res.get("response", "")
 
@@ -122,6 +123,11 @@ class LLMClient:
     def generate(self, query: str, retrieved_chunks: List[Dict[str, Any]], system_prompt: str, answer_template: str) -> Tuple[str, List[str], float, str]:
         start_time = time.time()
         
+        # Check retrieval relevance threshold
+        valid_chunks = [c for c in retrieved_chunks if c.get("score", 0.0) >= 0.35]
+        if not valid_chunks:
+            return FALLBACK_MESSAGE, [], 0.0, "system_guardrail"
+
         # 1. Ollama Local Model
         if self.provider == "ollama" or os.getenv("USE_OLLAMA", "0") == "1":
             try:
@@ -129,6 +135,9 @@ class LLMClient:
                 user_prompt = answer_template.format(context_documents=formatted_context, user_question=query)
                 answer = self.ollama_client.generate_completion(user_prompt, system_prompt=system_prompt)
                 
+                if "could not find sufficient information" in answer.lower():
+                    return FALLBACK_MESSAGE, [], round(time.time() - start_time, 6), f"ollama ({self.ollama_model})"
+
                 citations = re.findall(r"\[([A-Z0-9_-]+_chunk_\d+)\]", answer)
                 if not citations:
                     citations = [c["chunk_id"] for c in retrieved_chunks if c.get("score", 0.0) >= 0.35]
