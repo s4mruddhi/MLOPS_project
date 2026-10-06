@@ -61,8 +61,8 @@ pipeline {
                 bat '''
                     @echo off
                     echo Stopping previous container if running...
-                    docker stop %CONTAINER_NAME% 2>nul || exit /b 0
-                    docker rm -f %CONTAINER_NAME% 2>nul || exit /b 0
+                    docker stop %CONTAINER_NAME% 2>nul
+                    docker rm -f %CONTAINER_NAME% 2>nul
 
                     echo Starting new container on port %APP_PORT%...
                     docker run -d --name %CONTAINER_NAME% -p %APP_PORT%:8000 -e PYTHONUNBUFFERED=1 -e USE_TF=0 -e USE_TORCH=1 %IMAGE_NAME%
